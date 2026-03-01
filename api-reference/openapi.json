@@ -1,216 +1,5405 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
+    "title": "Citedy Agent API",
+    "version": "1.0.0",
+    "description": "Public contract for Citedy agent integrations. This contract reflects the current /api/agent surface without changing runtime behavior.",
+    "contact": {
+      "name": "Citedy Support",
+      "url": "https://www.citedy.com"
     },
-    "version": "1.0.0"
+    "license": {
+      "name": "Proprietary",
+      "url": "https://www.citedy.com"
+    }
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://www.citedy.com"
     }
   ],
-  "security": [
+  "tags": [
     {
-      "bearerAuth": []
+      "name": "Health",
+      "description": "Platform and dependency health"
+    },
+    {
+      "name": "Registration",
+      "description": "Agent onboarding and approval"
+    },
+    {
+      "name": "Agent",
+      "description": "Agent identity and key lifecycle"
+    },
+    {
+      "name": "Scout",
+      "description": "Trend scouting endpoints"
+    },
+    {
+      "name": "Gaps",
+      "description": "Content gap analysis"
+    },
+    {
+      "name": "Autopilot",
+      "description": "Article generation and retrieval"
+    },
+    {
+      "name": "Adaptations",
+      "description": "Social adaptation generation"
+    },
+    {
+      "name": "Sessions",
+      "description": "Autopilot recurring sessions"
+    },
+    {
+      "name": "Lead Magnets",
+      "description": "Lead magnet generation and state"
+    },
+    {
+      "name": "Ingest",
+      "description": "Content ingestion jobs"
+    },
+    {
+      "name": "Competitors",
+      "description": "Competitor discovery and analysis"
+    },
+    {
+      "name": "Personas",
+      "description": "Writing persona catalog"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Webhook endpoint registration and delivery logs"
+    },
+    {
+      "name": "Publishing",
+      "description": "Social publishing, scheduling and cancellation"
+    },
+    {
+      "name": "Schedule",
+      "description": "Content schedule timeline and gap analysis"
+    },
+    {
+      "name": "Settings",
+      "description": "Agent preferences and configuration"
+    },
+    {
+      "name": "Scan",
+      "description": "Experimental trend scanning (xAI Grok)"
+    },
+    {
+      "name": "Status",
+      "description": "Operational readiness and actionable onboarding status"
+    },
+    {
+      "name": "Products",
+      "description": "Product knowledge base document management"
+    },
+    {
+      "name": "Shorts",
+      "description": "Short-form video generation and polling"
     }
   ],
   "paths": {
-    "/plants": {
+    "/api/agent/health": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "tags": ["Health"],
+        "operationId": "getAgentPlatformHealth",
+        "summary": "Health check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "description": "Degraded or unhealthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/register": {
+      "post": {
+        "tags": ["Registration"],
+        "operationId": "registerAgentPending",
+        "summary": "Create pending agent registration",
+        "description": "Flow A: creates a pending registration and returns approval URL. No API key is returned here.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pending registration created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterAgentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/pending/{id}": {
+      "get": {
+        "tags": ["Registration"],
+        "operationId": "getPendingAgentStatus",
+        "summary": "Check pending registration status",
+        "security": [],
         "parameters": [
           {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
+            "name": "id",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Status response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/PendingRegistrationStatusResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          }
+        }
+      }
+    },
+    "/api/agent/approve": {
+      "post": {
+        "tags": ["Registration"],
+        "operationId": "approvePendingAgent",
+        "summary": "Approve pending registration",
+        "description": "Flow A step 2. Requires authenticated tenant owner session (dashboard auth), not agent API key.",
+        "security": [
+          {
+            "TenantSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Approved and API key issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApproveAgentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "410": {
+            "description": "Pending registration expired or not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/me": {
+      "get": {
+        "tags": ["Agent"],
+        "operationId": "getAgentContext",
+        "summary": "Get agent info, balance and limits",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentMeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/rotate-key": {
+      "post": {
+        "tags": ["Agent"],
+        "operationId": "rotateAgentKey",
+        "summary": "Rotate current agent API key",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New key generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotateKeyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/scout/x": {
+      "post": {
+        "tags": ["Scout"],
+        "operationId": "runXScout",
+        "summary": "Run X/Twitter scout",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoutXRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scout dispatched (async)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutXResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/scout/reddit": {
+      "post": {
+        "tags": ["Scout"],
+        "operationId": "runRedditScout",
+        "summary": "Run Reddit scout",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScoutRedditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scout dispatched (async)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutRedditResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/scout/reddit/{runId}": {
+      "get": {
+        "tags": ["Scout"],
+        "operationId": "getRedditScoutResult",
+        "summary": "Poll Reddit scout result",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scout poll result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutPollResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/scout/x/{runId}": {
+      "get": {
+        "tags": ["Scout"],
+        "operationId": "getXScoutResult",
+        "summary": "Poll X scout result",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scout poll result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoutPollResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/gaps": {
+      "get": {
+        "tags": ["Gaps"],
+        "operationId": "listContentGaps",
+        "summary": "List content gaps",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of gaps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGapsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/gaps/generate": {
+      "post": {
+        "tags": ["Gaps"],
+        "operationId": "generateContentGaps",
+        "summary": "Generate content gaps",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateGapsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Gaps generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateGapsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/autopilot": {
+      "post": {
+        "tags": ["Autopilot"],
+        "operationId": "generateAutopilotArticle",
+        "summary": "Generate article",
+        "description": "Current runtime behavior keeps auto-publish semantics and returns published status in response.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutopilotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Article generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/articles": {
+      "get": {
+        "tags": ["Autopilot"],
+        "operationId": "listAgentArticles",
+        "summary": "List articles",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Articles page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListArticlesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/adapt": {
+      "post": {
+        "tags": ["Adaptations"],
+        "operationId": "generateSocialAdaptations",
+        "summary": "Generate social adaptations",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdaptRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Adaptations generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdaptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/session": {
+      "post": {
+        "tags": ["Sessions"],
+        "operationId": "createAutopilotSession",
+        "summary": "Create and start autopilot session",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/lead-magnets": {
+      "post": {
+        "tags": ["Lead Magnets"],
+        "operationId": "createLeadMagnet",
+        "summary": "Generate lead magnet",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeadMagnetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generation queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateLeadMagnetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "501": {
+            "description": "Feature not implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Failed to queue generation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/lead-magnets/{id}": {
+      "get": {
+        "tags": ["Lead Magnets"],
+        "operationId": "getLeadMagnet",
+        "summary": "Get lead magnet status/details",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lead magnet state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LeadMagnetGeneratingResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LeadMagnetCompletedResponse"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "status",
+                    "mapping": {
+                      "generating": "#/components/schemas/LeadMagnetGeneratingResponse",
+                      "completed": "#/components/schemas/LeadMagnetCompletedResponse",
+                      "published": "#/components/schemas/LeadMagnetCompletedResponse",
+                      "archived": "#/components/schemas/LeadMagnetCompletedResponse"
+                    }
                   }
                 }
               }
             }
           },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
           }
         }
       },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+      "patch": {
+        "tags": ["Lead Magnets"],
+        "operationId": "updateLeadMagnetStatus",
+        "summary": "Publish or archive lead magnet",
+        "security": [
+          {
+            "AgentApiKey": []
           }
-        }
-      }
-    },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "ID of plant to delete",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
         "requestBody": {
-          "description": "Plant added to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "$ref": "#/components/schemas/UpdateLeadMagnetRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "description": "Lead magnet updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadMagnetCompletedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/ingest": {
+      "get": {
+        "tags": ["Ingest"],
+        "operationId": "listIngestJobs",
+        "summary": "List ingestion jobs",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["processing", "completed", "failed"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of ingestion jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Ingest"],
+        "operationId": "createIngestJob",
+        "summary": "Create ingestion job",
+        "description": "Returns 202 for new jobs or 200 for cached results (dedup hit).",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cached result (dedup hit)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestCachedResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "New job created and processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestCreatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/ingest/{id}": {
+      "get": {
+        "tags": ["Ingest"],
+        "operationId": "getIngestJob",
+        "summary": "Poll ingestion job status",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status (processing, completed, or failed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestJobStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/ingest/{id}/content": {
+      "get": {
+        "tags": ["Ingest"],
+        "operationId": "getIngestJobContent",
+        "summary": "Download raw ingested content",
+        "description": "Streams the raw content file from R2 storage. Primary response is a binary octet-stream; some content types may return JSON.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Raw content stream from R2 storage",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/api/agent/ingest/batch": {
+      "post": {
+        "tags": ["Ingest"],
+        "operationId": "createIngestBatch",
+        "summary": "Batch create ingestion jobs",
+        "description": "Returns 202 if at least one URL succeeded, 400 if all failed.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Batch accepted (partial or full success)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/competitors/discover": {
+      "post": {
+        "tags": ["Competitors"],
+        "operationId": "discoverCompetitors",
+        "summary": "Discover competitors by keywords",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompetitorDiscoverRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Competitors discovered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetitorDiscoverResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/competitors/scout": {
+      "post": {
+        "tags": ["Competitors"],
+        "operationId": "scoutCompetitor",
+        "summary": "Analyze a competitor domain",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompetitorScoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Competitor analysis complete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetitorScoutResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/webhooks": {
+      "post": {
+        "tags": ["Webhooks"],
+        "operationId": "registerWebhookEndpoint",
+        "summary": "Register webhook endpoint",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookRegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook endpoint created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookRegisterResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Webhooks"],
+        "operationId": "listWebhookEndpoints",
+        "summary": "List webhook endpoints",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook endpoints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/webhooks/deliveries": {
+      "get": {
+        "tags": ["Webhooks"],
+        "operationId": "listWebhookDeliveries",
+        "summary": "List webhook delivery history",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/WebhookDeliveryStatus"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDeliveryListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/webhooks/{id}": {
+      "delete": {
+        "tags": ["Webhooks"],
+        "operationId": "deleteWebhookEndpoint",
+        "summary": "Delete webhook endpoint",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook endpoint deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookDeleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/personas": {
+      "get": {
+        "tags": ["Personas"],
+        "operationId": "listPersonas",
+        "summary": "List available personas",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Personas list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonasResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/publish": {
+      "post": {
+        "tags": ["Publishing"],
+        "operationId": "publishSocialAdaptation",
+        "summary": "Publish, schedule, or cancel a social adaptation",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Publish action completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "Platform publishing locked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Adaptation not in publishable state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/schedule": {
+      "get": {
+        "tags": ["Schedule"],
+        "operationId": "getScheduleTimeline",
+        "summary": "Get scheduled content timeline",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Start date (default: today)"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "End date (default: today + 14 days)"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "article", "post", "social"],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/schedule/gaps": {
+      "get": {
+        "tags": ["Schedule"],
+        "operationId": "getScheduleGaps",
+        "summary": "Identify days with fewer posts than target",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "default": 7
+            }
+          },
+          {
+            "name": "timezone",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "IANA timezone (defaults to agent setting)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule gaps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleGapsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/schedule/suggest": {
+      "get": {
+        "tags": ["Schedule"],
+        "operationId": "suggestTimeSlots",
+        "summary": "Get recommended posting time slots",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suggested slots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleSuggestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "operationId": "getAgentSettings",
+        "summary": "Get agent preferences and configuration",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Settings"],
+        "operationId": "updateAgentSettings",
+        "summary": "Update agent preferences (partial update)",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAgentSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSettingsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/post": {
+      "post": {
+        "tags": ["Autopilot"],
+        "operationId": "createMicroPost",
+        "summary": "Create micro-content post with social adaptations",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePostRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePostResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/scan": {
+      "post": {
+        "tags": ["Scan"],
+        "operationId": "scanTrends",
+        "summary": "Scan trends via xAI Grok (experimental)",
+        "description": "Search X/Twitter, web, and HackerNews for trending content. Credit cost: fast=2, deep=4, ultra=6.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scan results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/image-style": {
+      "put": {
+        "tags": ["Settings"],
+        "operationId": "updateImageStyle",
+        "summary": "Set illustration style preset",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateImageStyleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Style updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateImageStyleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/status": {
+      "get": {
+        "tags": ["Status"],
+        "operationId": "getAgentStatus",
+        "summary": "Get operational agent status",
+        "description": "Returns actionable status snapshot for credits, social connections, schedule, knowledge base and content readiness.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/products": {
+      "post": {
+        "tags": ["Products"],
+        "operationId": "createProductDocument",
+        "summary": "Upload product knowledge document",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document uploaded and embedded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "422": {
+            "description": "Tenant document limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Products"],
+        "operationId": "listProductDocuments",
+        "summary": "List product knowledge documents",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product knowledge documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/products/{id}": {
+      "delete": {
+        "tags": ["Products"],
+        "operationId": "deleteProductDocument",
+        "summary": "Delete product knowledge document by ID",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDeleteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/products/search": {
+      "post": {
+        "tags": ["Products"],
+        "operationId": "searchProductKnowledge",
+        "summary": "Search product knowledge documents",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/shorts": {
+      "post": {
+        "tags": ["Shorts"],
+        "operationId": "generateShortsVideo",
+        "summary": "Generate short-form video",
+        "description": "Starts short-form video generation and returns immediate processing status for polling.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortsGenerateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generation accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsGenerateAcceptedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/shorts/{id}": {
+      "get": {
+        "tags": ["Shorts"],
+        "operationId": "getShortsVideoStatus",
+        "summary": "Get shorts generation status by ID",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generation status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
           }
         }
       }
     }
   },
   "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+    "securitySchemes": {
+      "AgentApiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Bearer citedy_agent_* key"
+      },
+      "TenantSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sb-access-token",
+        "description": "Supabase dashboard session cookie"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
             }
           }
-        ]
+        }
       },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/RateLimitErrorResponse"
+            }
+          }
+        }
+      },
+      "PaymentRequired": {
+        "description": "Insufficient credits",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PaymentRequiredResponse"
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "Bad gateway -- upstream storage fetch failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
           }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["error"],
+        "additionalProperties": true
+      },
+      "RateLimitErrorResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "retry_after": {
+                "type": "integer"
+              }
+            },
+            "required": ["retry_after"]
+          }
+        ]
+      },
+      "PaymentRequiredResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "credits_required": {
+                "type": "number"
+              },
+              "breakdown": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              "topup": {
+                "type": "object",
+                "description": "Recommended credit top-up package with billing URL",
+                "properties": {
+                  "recommended_package_credits": {
+                    "type": "integer",
+                    "description": "Credits in the recommended package"
+                  },
+                  "recommended_package_price_usd": {
+                    "type": "number",
+                    "description": "Price of the recommended package in USD"
+                  },
+                  "topup_url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL to billing page with package pre-selected"
+                  }
+                },
+                "required": [
+                  "recommended_package_credits",
+                  "recommended_package_price_usd",
+                  "topup_url"
+                ]
+              }
+            },
+            "required": ["credits_required", "topup"],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "HealthCheckResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "unhealthy"]
+          },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "redis": {
+                "type": "boolean"
+              },
+              "supabase": {
+                "type": "boolean"
+              }
+            },
+            "required": ["redis", "supabase"]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": ["status", "checks", "timestamp"]
+      },
+      "RegisterAgentRequest": {
+        "type": "object",
+        "properties": {
+          "agent_name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": ["agent_name"],
+        "additionalProperties": false
+      },
+      "RegisterAgentResponse": {
+        "type": "object",
+        "properties": {
+          "pending_id": {
+            "type": "string"
+          },
+          "approval_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["awaiting_approval"]
+          }
+        },
+        "required": ["pending_id", "approval_url"],
+        "additionalProperties": false
+      },
+      "PendingRegistrationStatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["awaiting_approval", "expired"]
+          },
+          "agent_name": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "ApproveAgentRequest": {
+        "type": "object",
+        "properties": {
+          "pending_id": {
+            "type": "string"
+          }
+        },
+        "required": ["pending_id"],
+        "additionalProperties": false
+      },
+      "ApproveAgentResponse": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agent_api_key": {
+            "type": "string",
+            "pattern": "^citedy_agent_"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active"]
+          }
+        },
+        "required": ["agent_id", "agent_api_key", "status"],
+        "additionalProperties": false
+      },
+      "AgentMeResponse": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agent_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "api_key_prefix": {
+            "type": "string"
+          },
+          "last_activity_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "total_credits_used": {
+            "type": "number"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blog_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "tenant_balance": {
+            "type": "object",
+            "properties": {
+              "credits": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["healthy", "low", "empty"]
+              }
+            },
+            "required": ["credits", "status"]
+          },
+          "rate_limits": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "remaining": {
+                  "type": "integer"
+                },
+                "resetAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": ["remaining", "resetAt"]
+            }
+          },
+          "referral": {
+            "type": ["object", "null"],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["code", "url"]
+          },
+          "connected_platforms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "platform": {
+                  "type": "string"
+                },
+                "connected": {
+                  "type": "boolean"
+                },
+                "account_name": {
+                  "type": ["string", "null"]
+                }
+              },
+              "required": ["platform", "connected", "account_name"]
+            }
+          },
+          "stats_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          }
+        },
+        "required": [
+          "agent_id",
+          "agent_name",
+          "status",
+          "api_key_prefix",
+          "total_credits_used",
+          "created_at",
+          "tenant_balance",
+          "rate_limits",
+          "connected_platforms"
+        ],
+        "additionalProperties": false
+      },
+      "RotateKeyResponse": {
+        "type": "object",
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agent_api_key": {
+            "type": "string",
+            "pattern": "^citedy_agent_"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["agent_id", "agent_api_key", "message"],
+        "additionalProperties": false
+      },
+      "ScoutXRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["fast", "ultimate"],
+            "default": "fast"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "ScoutRedditRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "subreddits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "default": []
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "ScoutResponseBase": {
+        "type": "object",
+        "description": "Shared fields for all scout responses.",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "query": {
+            "type": "string"
+          },
+          "results": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "credits_used": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": ["run_id", "query", "credits_used"]
+      },
+      "ScoutXResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ScoutResponseBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["fast", "ultimate"]
+              }
+            },
+            "required": ["mode"]
+          }
+        ]
+      },
+      "ScoutRedditResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ScoutResponseBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "subreddits": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": ["subreddits"]
+          }
+        ]
+      },
+      "ScoutPollResponse": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing", "completed", "failed"]
+          },
+          "results": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "error": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          }
+        },
+        "required": ["run_id", "status"]
+      },
+      "GapItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "gap_type": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          },
+          "opportunity_score": {
+            "type": ["number", "null"]
+          },
+          "status": {
+            "type": "string"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["title", "gap_type", "priority"],
+        "additionalProperties": true
+      },
+      "ListGapsResponse": {
+        "type": "object",
+        "properties": {
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GapItem"
+            }
+          },
+          "total_gaps": {
+            "type": "integer"
+          },
+          "credits_used": {
+            "type": "number"
+          }
+        },
+        "required": ["gaps", "total_gaps", "credits_used"],
+        "additionalProperties": false
+      },
+      "GenerateGapsRequest": {
+        "type": "object",
+        "properties": {
+          "competitor_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 1,
+            "maxItems": 5
+          }
+        },
+        "required": ["competitor_urls"],
+        "additionalProperties": false
+      },
+      "GenerateGapsResponse": {
+        "type": "object",
+        "properties": {
+          "gaps_found": {
+            "type": "integer"
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "credits_used": {
+            "type": "number"
+          }
+        },
+        "required": ["gaps_found", "gaps", "credits_used"],
+        "additionalProperties": false
+      },
+      "AutopilotRequestBase": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "source_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 1,
+            "maxItems": 3
+          },
+          "language": {
+            "type": "string",
+            "default": "en"
+          },
+          "size": {
+            "type": "string",
+            "enum": ["mini", "standard", "full", "pillar"],
+            "default": "standard"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["standard", "turbo"],
+            "default": "standard"
+          },
+          "enable_search": {
+            "type": "boolean",
+            "default": false
+          },
+          "persona": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "illustrations": {
+            "type": "boolean",
+            "default": false
+          },
+          "audio": {
+            "type": "boolean",
+            "default": false
+          },
+          "disable_competition": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "AutopilotRequest": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AutopilotRequestBase"
+              },
+              {
+                "required": ["topic"]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AutopilotRequestBase"
+              },
+              {
+                "required": ["source_urls"]
+              }
+            ]
+          }
+        ]
+      },
+      "AutopilotResponse": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "type": ["string", "null"],
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "article_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "status": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "word_count": {
+            "type": "integer"
+          },
+          "credits_used": {
+            "type": "number"
+          },
+          "estimated_total_credits": {
+            "type": "number"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "extraction_results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": ["title", "slug", "status", "word_count", "credits_used"],
+        "additionalProperties": true
+      },
+      "ArticleSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "word_count": {
+            "type": ["integer", "null"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "title", "slug", "status", "created_at"],
+        "additionalProperties": false
+      },
+      "ListArticlesResponse": {
+        "type": "object",
+        "properties": {
+          "articles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArticleSummary"
+            }
+          },
+          "total_articles": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "credits_used": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "articles",
+          "total_articles",
+          "limit",
+          "offset",
+          "credits_used"
+        ],
+        "additionalProperties": false
+      },
+      "AdaptRequest": {
+        "type": "object",
+        "properties": {
+          "article_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "x_article",
+                "x_thread",
+                "linkedin",
+                "facebook",
+                "reddit",
+                "threads",
+                "instagram"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 3,
+            "uniqueItems": true
+          },
+          "include_ref_link": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": ["article_id", "platforms"],
+        "additionalProperties": false
+      },
+      "AdaptationItem": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "credits_used": {
+            "type": "number"
+          },
+          "char_count": {
+            "type": "integer"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "platform_post_id": {
+            "type": ["string", "null"]
+          }
+        },
+        "required": [
+          "platform",
+          "content",
+          "credits_used",
+          "char_count",
+          "published",
+          "platform_post_id"
+        ],
+        "additionalProperties": false
+      },
+      "AdaptResponse": {
+        "type": "object",
+        "properties": {
+          "adaptations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdaptationItem"
+            }
+          },
+          "total_credits": {
+            "type": "number"
+          },
+          "ref_link_appended": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "platform": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": ["platform", "error"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["adaptations", "total_credits", "ref_link_appended"],
+        "additionalProperties": false
+      },
+      "CreateSessionRequest": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "minItems": 1,
+            "maxItems": 5
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "maxItems": 20
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 5
+            },
+            "default": ["en"]
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 10080,
+            "default": 720
+          },
+          "article_size": {
+            "type": "string",
+            "enum": ["mini", "standard", "full", "pillar"],
+            "default": "mini"
+          },
+          "disable_competition": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": ["categories"],
+        "additionalProperties": false
+      },
+      "CreateSessionResponse": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "interval_minutes": {
+            "type": "integer"
+          },
+          "article_size": {
+            "type": "string"
+          },
+          "estimated_credits_per_article": {
+            "type": "number"
+          },
+          "topic_catalog_size": {
+            "type": "integer"
+          },
+          "next_run_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "session_id",
+          "status",
+          "categories",
+          "languages",
+          "interval_minutes",
+          "article_size",
+          "estimated_credits_per_article",
+          "topic_catalog_size"
+        ],
+        "additionalProperties": false
+      },
+      "CreateLeadMagnetRequest": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200
+          },
+          "type": {
+            "type": "string",
+            "enum": ["checklist", "swipe_file", "framework"]
+          },
+          "niche": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "language": {
+            "type": "string",
+            "enum": ["en", "pt", "de", "es", "fr", "it"],
+            "default": "en"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["twitter", "linkedin"],
+            "default": "twitter"
+          },
+          "generate_images": {
+            "type": "boolean",
+            "default": false
+          },
+          "auto_publish": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": ["topic", "type"],
+        "additionalProperties": false
+      },
+      "CreateLeadMagnetResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["generating"]
+          },
+          "type": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "credits_charged": {
+            "type": "number"
+          },
+          "auto_publish": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "type",
+          "topic",
+          "credits_charged",
+          "auto_publish"
+        ],
+        "additionalProperties": false
+      },
+      "LeadMagnetGeneratingResponse": {
+        "type": "object",
+        "description": "Returned while the lead magnet is still being generated.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["generating"]
+          },
+          "type": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "progress": {
+            "type": ["object", "null"],
+            "properties": {
+              "stage": {
+                "type": "string"
+              },
+              "percent": {
+                "type": "number"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": ["stage", "percent", "message"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "status", "type", "topic"],
+        "additionalProperties": false
+      },
+      "LeadMagnetCompletedResponse": {
+        "type": "object",
+        "description": "Returned when the lead magnet is completed, published, or archived.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["completed", "published", "archived"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "public_slug": {
+            "type": ["string", "null"]
+          },
+          "public_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "pdf_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "title", "type", "topic", "created_at"],
+        "additionalProperties": false
+      },
+      "UpdateLeadMagnetRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["published", "archived"]
+          }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "IngestJobStatus": {
+        "type": "string",
+        "enum": ["processing", "completed", "failed"]
+      },
+      "IngestContentType": {
+        "type": "string",
+        "enum": [
+          "youtube_video",
+          "web_article",
+          "pdf_document",
+          "audio_file",
+          "podcast_episode"
+        ]
+      },
+      "IngestJobSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/IngestJobStatus"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/IngestContentType"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "tenant_id", "status", "content_type", "created_at"],
+        "additionalProperties": false
+      },
+      "IngestListResponse": {
+        "type": "object",
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngestJobSummary"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          }
+        },
+        "required": ["jobs", "total", "limit", "offset"],
+        "additionalProperties": false
+      },
+      "IngestCreateRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048
+          }
+        },
+        "required": ["url"],
+        "additionalProperties": false
+      },
+      "IngestCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing"]
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/IngestContentType"
+          },
+          "credits_charged": {
+            "type": "integer"
+          },
+          "poll_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "content_type",
+          "credits_charged",
+          "poll_url"
+        ],
+        "additionalProperties": false
+      },
+      "IngestMetadata": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": ["string", "null"]
+          },
+          "author": {
+            "type": ["string", "null"]
+          },
+          "duration_seconds": {
+            "type": ["integer", "null"]
+          },
+          "published_at": {
+            "type": ["string", "null"]
+          },
+          "language": {
+            "type": ["string", "null"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "IngestCachedResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["completed"]
+          },
+          "cached": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/IngestContentType"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/IngestMetadata"
+          },
+          "word_count": {
+            "type": "integer"
+          },
+          "credits_charged": {
+            "type": "integer"
+          },
+          "file_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "cached",
+          "content_type",
+          "source_url",
+          "summary",
+          "metadata",
+          "word_count",
+          "credits_charged",
+          "file_url"
+        ],
+        "additionalProperties": false
+      },
+      "IngestJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/IngestJobStatus"
+          },
+          "content_type": {
+            "$ref": "#/components/schemas/IngestContentType"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/IngestMetadata"
+          },
+          "word_count": {
+            "type": "integer"
+          },
+          "credits_charged": {
+            "type": "integer"
+          },
+          "file_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "error": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status"],
+        "additionalProperties": false
+      },
+      "IngestBatchRequest": {
+        "type": "object",
+        "properties": {
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 1,
+            "maxItems": 20
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048
+          }
+        },
+        "required": ["urls"],
+        "additionalProperties": false
+      },
+      "IngestBatchResultItem": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["accepted", "cached", "error"]
+          },
+          "job_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "error": {
+            "type": "string"
+          },
+          "credits_charged": {
+            "type": "integer"
+          }
+        },
+        "required": ["url", "status", "credits_charged"],
+        "additionalProperties": false
+      },
+      "IngestBatchResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "accepted": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IngestBatchResultItem"
+            }
+          }
+        },
+        "required": ["total", "accepted", "failed", "results"],
+        "additionalProperties": false
+      },
+      "CompetitorDiscoverRequest": {
+        "type": "object",
+        "properties": {
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "minItems": 1,
+            "maxItems": 5
+          }
+        },
+        "required": ["keywords"],
+        "additionalProperties": false
+      },
+      "CompetitorItem": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "keywords_count": {
+            "type": "integer"
+          },
+          "avg_position": {
+            "type": "number"
+          },
+          "etv": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "domain",
+          "visibility",
+          "keywords_count",
+          "avg_position",
+          "etv"
+        ],
+        "additionalProperties": false
+      },
+      "CompetitorDiscoverResponse": {
+        "type": "object",
+        "properties": {
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "competitors_found": {
+            "type": "integer"
+          },
+          "competitors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompetitorItem"
+            }
+          },
+          "credits_used": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords",
+          "competitors_found",
+          "competitors",
+          "credits_used"
+        ],
+        "additionalProperties": false
+      },
+      "CompetitorScoutRequest": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["fast", "ultimate"],
+            "default": "fast"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "language": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 5,
+            "default": "en"
+          }
+        },
+        "required": ["domain"],
+        "additionalProperties": false
+      },
+      "CompetitorIntelligence": {
+        "type": "object",
+        "properties": {
+          "strengths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "opportunities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "content_strategy": {
+            "type": "string"
+          },
+          "estimated_monthly_traffic": {
+            "type": "integer"
+          },
+          "top_content_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "strengths",
+          "weaknesses",
+          "opportunities",
+          "threats",
+          "content_strategy",
+          "estimated_monthly_traffic",
+          "top_content_categories"
+        ],
+        "additionalProperties": false
+      },
+      "CompetitorScoutResponse": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["fast", "ultimate"]
+          },
+          "intelligence": {
+            "$ref": "#/components/schemas/CompetitorIntelligence"
+          },
+          "credits_used": {
+            "type": "integer"
+          }
+        },
+        "required": ["domain", "mode", "intelligence", "credits_used"],
+        "additionalProperties": false
+      },
+      "WebhookEventType": {
+        "type": "string",
+        "enum": [
+          "article.generated",
+          "article.failed",
+          "lead_magnet.ready",
+          "lead_magnet.failed",
+          "ingestion.completed",
+          "ingestion.failed",
+          "social_adaptation.generated",
+          "scout.results_ready",
+          "scout.dispatched",
+          "session.articles_generated",
+          "billing.credits_low",
+          "billing.credits_empty"
+        ]
+      },
+      "WebhookDeliveryStatus": {
+        "type": "string",
+        "enum": ["queued", "delivering", "delivered", "failed", "dead_lettered"]
+      },
+      "WebhookRegisterRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "event_types": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEventType"
+            },
+            "maxItems": 32
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": ["url"],
+        "additionalProperties": false
+      },
+      "WebhookRegisterResponse": {
+        "type": "object",
+        "properties": {
+          "webhook_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "event_types": {
+            "type": ["array", "null"],
+            "items": {
+              "$ref": "#/components/schemas/WebhookEventType"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "webhook_id",
+          "url",
+          "secret",
+          "event_types",
+          "created_at"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookEndpointSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string"
+          },
+          "event_types": {
+            "type": ["array", "null"],
+            "items": {
+              "$ref": "#/components/schemas/WebhookEventType"
+            }
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": ["string", "null"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "event_types",
+          "is_active",
+          "description",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookListResponse": {
+        "type": "object",
+        "properties": {
+          "webhooks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookEndpointSummary"
+            }
+          }
+        },
+        "required": ["webhooks"],
+        "additionalProperties": false
+      },
+      "WebhookDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "webhook_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["success", "webhook_id"],
+        "additionalProperties": false
+      },
+      "WebhookDeliveryItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/WebhookEventType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WebhookDeliveryStatus"
+          },
+          "attempts": {
+            "type": "integer"
+          },
+          "last_http_status": {
+            "type": ["integer", "null"]
+          },
+          "last_error": {
+            "type": ["string", "null"]
+          },
+          "duration_ms": {
+            "type": ["integer", "null"]
+          },
+          "delivered_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endpoint": {
+            "type": ["object", "null"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "url": {
+                "type": "string"
+              },
+              "description": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": ["id", "url", "description"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "event_id",
+          "event_type",
+          "status",
+          "attempts",
+          "last_http_status",
+          "last_error",
+          "duration_ms",
+          "delivered_at",
+          "created_at",
+          "updated_at",
+          "endpoint"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookDeliveryListResponse": {
+        "type": "object",
+        "properties": {
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebhookDeliveryItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          }
+        },
+        "required": ["deliveries", "total", "limit", "offset"],
+        "additionalProperties": false
+      },
+      "PersonaItem": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["slug", "displayName", "group", "description"],
+        "additionalProperties": false
+      },
+      "PersonasResponse": {
+        "type": "object",
+        "properties": {
+          "personas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "usage": {
+            "type": "string"
+          }
+        },
+        "required": ["personas", "total", "usage"],
+        "additionalProperties": false
+      },
+      "PublishRequest": {
+        "type": "object",
+        "properties": {
+          "adaptationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["now", "schedule", "cancel"]
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Required if action=schedule. Must be a future date."
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "facebook",
+              "linkedin",
+              "x_article",
+              "x_thread",
+              "reddit",
+              "threads",
+              "instagram"
+            ]
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": ["adaptationId", "action", "platform", "accountId"],
+        "additionalProperties": false
+      },
+      "PublishResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "action": {
+            "type": "string",
+            "enum": ["now", "schedule", "cancel"]
+          },
+          "adaptationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postId": {
+            "type": ["string", "null"],
+            "description": "Present when action=now"
+          },
+          "scheduledAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Present when action=schedule"
+          },
+          "messageId": {
+            "type": ["string", "null"],
+            "description": "QStash message ID for scheduled publish"
+          },
+          "deduplicated": {
+            "type": "boolean",
+            "description": "True if publish was skipped because already published"
+          }
+        },
+        "required": ["success", "action", "adaptationId"],
+        "additionalProperties": false
+      },
+      "ScheduleItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["article", "post", "social_adaptation"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "platform": {
+            "type": ["string", "null"],
+            "description": "Only for social_adaptation type"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "type", "title", "scheduledAt", "status"],
+        "additionalProperties": false
+      },
+      "ScheduleListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": ["items", "total", "from", "to"],
+        "additionalProperties": false
+      },
+      "ScheduleGapItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "scheduled": {
+            "type": "integer"
+          },
+          "target": {
+            "type": "integer"
+          }
+        },
+        "required": ["date", "scheduled", "target"],
+        "additionalProperties": false
+      },
+      "ScheduleGapsResponse": {
+        "type": "object",
+        "properties": {
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleGapItem"
+            }
+          },
+          "totalGaps": {
+            "type": "integer"
+          },
+          "daysAnalyzed": {
+            "type": "integer"
+          },
+          "postsPerDay": {
+            "type": "integer"
+          }
+        },
+        "required": ["gaps", "totalGaps", "daysAnalyzed", "postsPerDay"],
+        "additionalProperties": false
+      },
+      "ScheduleSuggestResponse": {
+        "type": "object",
+        "properties": {
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "postsPerDay": {
+            "type": "integer"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["custom", "recommended"]
+          }
+        },
+        "required": ["slots", "postsPerDay", "timezone", "source"],
+        "additionalProperties": false
+      },
+      "PublishSchedule": {
+        "type": "object",
+        "properties": {
+          "postsPerDay": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 2
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "maxItems": 48
+          }
+        },
+        "required": ["postsPerDay"],
+        "additionalProperties": false
+      },
+      "AgentSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "defaultPlatforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "linkedin",
+                "x_article",
+                "x_thread",
+                "facebook",
+                "reddit",
+                "threads",
+                "instagram"
+              ]
+            },
+            "maxItems": 10
+          },
+          "imageStylePreset": {
+            "type": "string",
+            "enum": ["minimal", "tech", "bold"],
+            "default": "minimal"
+          },
+          "contentTone": {
+            "type": "string",
+            "enum": ["professional", "casual", "bold"],
+            "default": "professional"
+          },
+          "publishSchedule": {
+            "$ref": "#/components/schemas/PublishSchedule"
+          },
+          "targetTimezone": {
+            "type": "string",
+            "default": "America/New_York"
+          },
+          "trustLevel": {
+            "type": "string",
+            "enum": ["ask_all", "show_preview", "autopilot"],
+            "default": "show_preview"
+          },
+          "scanSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["x", "google", "hn", "reddit", "producthunt"]
+            }
+          }
+        },
+        "required": [
+          "defaultPlatforms",
+          "imageStylePreset",
+          "contentTone",
+          "publishSchedule",
+          "targetTimezone",
+          "trustLevel",
+          "scanSources"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateAgentSettingsRequest": {
+        "type": "object",
+        "description": "All fields optional — partial update",
+        "properties": {
+          "defaultPlatforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10
+          },
+          "imageStylePreset": {
+            "type": "string",
+            "enum": ["minimal", "tech", "bold"]
+          },
+          "contentTone": {
+            "type": "string",
+            "enum": ["professional", "casual", "bold"]
+          },
+          "publishSchedule": {
+            "$ref": "#/components/schemas/PublishSchedule"
+          },
+          "targetTimezone": {
+            "type": "string"
+          },
+          "trustLevel": {
+            "type": "string",
+            "enum": ["ask_all", "show_preview", "autopilot"]
+          },
+          "scanSources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["x", "google", "hn", "reddit", "producthunt"]
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreatePostRequest": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 7
+          },
+          "tone": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "imageStyle": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Must be future date if provided"
+          },
+          "contentType": {
+            "type": "string",
+            "enum": ["short", "detailed"],
+            "default": "short"
+          }
+        },
+        "required": ["topic"],
+        "additionalProperties": false
+      },
+      "CreatePostResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "postId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adaptations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "platform": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "platform"]
+            }
+          },
+          "scheduledAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "required": ["success", "postId", "adaptations", "scheduledAt"],
+        "additionalProperties": false
+      },
+      "ScanRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["fast", "deep", "ultra"]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30,
+            "default": 10
+          }
+        },
+        "required": ["query", "mode"],
+        "additionalProperties": false
+      },
+      "ScanResult": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["x", "web", "hackernews"]
+          },
+          "relevance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": ["title", "summary", "url", "source", "relevance"],
+        "additionalProperties": false
+      },
+      "ScanResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["fast", "deep", "ultra"]
+          },
+          "query": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScanResult"
+            }
+          },
+          "cost": {
+            "type": "integer"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["success", "mode", "query", "results", "cost"],
+        "additionalProperties": false
+      },
+      "UpdateImageStyleRequest": {
+        "type": "object",
+        "properties": {
+          "preset": {
+            "type": "string",
+            "enum": ["minimal", "tech", "bold"]
+          }
+        },
+        "required": ["preset"],
+        "additionalProperties": false
+      },
+      "UpdateImageStyleResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "preset": {
+            "type": "string"
+          }
+        },
+        "required": ["success", "preset"],
+        "additionalProperties": false
+      },
+      "AgentStatusAction": {
+        "type": "object",
+        "required": ["severity", "title", "message"],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "warning", "info"]
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "AgentStatusPlatformConnection": {
+        "type": "object",
+        "required": ["platform", "account_name"],
+        "properties": {
+          "platform": {
+            "type": "string"
+          },
+          "account_name": {
+            "type": ["string", "null"]
+          }
+        }
+      },
+      "AgentStatusResponse": {
+        "type": "object",
+        "required": [
+          "summary",
+          "billing",
+          "social",
+          "schedule",
+          "knowledge",
+          "content",
+          "tenant",
+          "actions",
+          "generated_at"
+        ],
+        "properties": {
+          "summary": {
+            "type": "object",
+            "required": [
+              "operational_status",
+              "ready_to_create",
+              "ready_to_publish",
+              "blockers_count",
+              "warnings_count"
+            ],
+            "properties": {
+              "operational_status": {
+                "type": "string",
+                "enum": ["ready", "attention", "blocked"]
+              },
+              "ready_to_create": {
+                "type": "boolean"
+              },
+              "ready_to_publish": {
+                "type": "boolean"
+              },
+              "blockers_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "warnings_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "billing": {
+            "type": "object",
+            "required": ["credits_available", "status", "topup_url"],
+            "properties": {
+              "credits_available": {
+                "type": "number"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["healthy", "low", "empty"]
+              },
+              "topup_url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "social": {
+            "type": "object",
+            "required": [
+              "connected_count",
+              "connected_platforms",
+              "default_platforms",
+              "missing_default_platforms",
+              "connect_url"
+            ],
+            "properties": {
+              "connected_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "connected_platforms": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AgentStatusPlatformConnection"
+                }
+              },
+              "default_platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "missing_default_platforms": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "connect_url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "schedule": {
+            "type": "object",
+            "required": [
+              "timezone",
+              "posts_per_day_target",
+              "next_publish_at",
+              "scheduled_24h",
+              "scheduled_7d",
+              "gaps_count_7d",
+              "calendar_url"
+            ],
+            "properties": {
+              "timezone": {
+                "type": "string"
+              },
+              "posts_per_day_target": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "next_publish_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "scheduled_24h": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "scheduled_7d": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "gaps_count_7d": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "calendar_url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "knowledge": {
+            "type": "object",
+            "required": [
+              "has_documents",
+              "documents_count",
+              "last_document_at",
+              "add_documents_command",
+              "add_documents_url"
+            ],
+            "properties": {
+              "has_documents": {
+                "type": "boolean"
+              },
+              "documents_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "last_document_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "add_documents_command": {
+                "type": "string"
+              },
+              "add_documents_url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          "content": {
+            "type": "object",
+            "required": [
+              "has_content",
+              "total_items",
+              "latest_article_at",
+              "latest_post_at",
+              "create_post_command",
+              "create_article_command"
+            ],
+            "properties": {
+              "has_content": {
+                "type": "boolean"
+              },
+              "total_items": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "latest_article_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "latest_post_at": {
+                "type": ["string", "null"],
+                "format": "date-time"
+              },
+              "create_post_command": {
+                "type": "string"
+              },
+              "create_article_command": {
+                "type": "string"
+              }
+            }
+          },
+          "tenant": {
+            "type": "object",
+            "required": ["blog_url", "blog_handle"],
+            "properties": {
+              "blog_url": {
+                "type": ["string", "null"],
+                "format": "uri"
+              },
+              "blog_handle": {
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentStatusAction"
+            }
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductCreateRequest": {
+        "type": "object",
+        "required": ["title", "content"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500000
+          },
+          "source_type": {
+            "type": "string",
+            "enum": ["upload", "url", "manual"],
+            "default": "upload"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductCreateResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source_type",
+          "chunks_count",
+          "chunks_failed",
+          "partial",
+          "token_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "chunks_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "chunks_failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "token_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ProductDocumentSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source_type",
+          "source_name",
+          "token_count",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "source_name": {
+            "type": ["string", "null"]
+          },
+          "token_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProductListResponse": {
+        "type": "object",
+        "required": ["documents"],
+        "properties": {
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDocumentSummary"
+            }
+          }
+        }
+      },
+      "ProductDeleteResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProductSearchRequest": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductSearchResultItem": {
+        "type": "object",
+        "required": ["document_id", "content", "similarity"],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "string"
+          },
+          "similarity": {
+            "type": "number"
+          }
+        }
+      },
+      "ProductSearchResponse": {
+        "type": "object",
+        "required": ["results"],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSearchResultItem"
+            }
+          }
+        }
+      },
+      "ShortsGenerateRequest": {
+        "type": "object",
+        "required": ["prompt", "avatar_url", "duration"],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 2000
+          },
+          "avatar_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "duration": {
+            "type": "integer",
+            "enum": [5, 10, 15]
+          },
+          "resolution": {
+            "type": "string",
+            "enum": ["480p", "720p"],
+            "default": "480p"
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": ["9:16", "16:9", "1:1"],
+            "default": "9:16"
+          },
+          "speech_text": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 1000
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsGenerateAcceptedResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "video_url",
+          "credits_charged",
+          "estimated_seconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["generating"]
+          },
+          "video_url": {
+            "type": ["string", "null"]
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "estimated_seconds": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ShortsStatusResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "credits_charged",
+          "video_url",
+          "error",
+          "subtitles_applied",
+          "subtitle_warning"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["generating", "completed", "failed"]
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "video_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "error": {
+            "type": ["string", "null"]
+          },
+          "subtitles_applied": {
+            "type": "boolean"
+          },
+          "subtitle_warning": {
+            "type": ["string", "null"]
+          }
+        }
       }
     }
   }
