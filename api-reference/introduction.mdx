@@ -1,33 +1,31 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: API Reference
+description: Interactive API documentation for the Citedy Agent Platform
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+# API Reference
 
-## Welcome
+Explore the complete Citedy Agent API. All endpoints require authentication via Bearer token.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URL
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+https://www.citedy.com
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
-
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
 ```
+Authorization: Bearer <AGENT_API_KEY>
+Content-Type: application/json
+```
+
+## Credit Value
+
+1 credit = $0.01 USD. See [credit pricing](/billing/credits) for packages and operation costs.
+
+## Getting Started
+
+1. [Register](/quickstart) to get your API key
+2. Use the interactive playground below to test endpoints
+3. Check [error codes](/platform/api#error-responses) for troubleshooting
