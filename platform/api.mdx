@@ -4,16 +4,6 @@ description: Complete Agent API endpoint reference — methods, paths, auth, cos
 openapi: api-reference/openapi.json
 ---
 
-All endpoints require:
-
-```
-Authorization: Bearer <AGENT_API_KEY>
-Content-Type: application/json
-```
-
-Base URL: `https://www.citedy.com`
-
-Credit value: 1 credit = $0.01 USD
 
 ## Account & Auth
 
@@ -30,7 +20,7 @@ Request:
 ```json
 {
   "agent_name": "my-agent",
-  "description": "Optional description (max 500 chars)"
+  "description": "Optional description"
 }
 ```
 
@@ -44,7 +34,7 @@ Response:
 }
 ```
 
-The registration requires human approval. Open `approval_url` in browser to approve and receive API key.
+---
 
 ### Get Agent Info
 
@@ -54,7 +44,20 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-### Health Check
+Response:
+
+```json
+{
+  "tenantId": "uuid",
+  "domain": "myblog.citedy.com",
+  "balance": 247,
+  "plan": "credits"
+}
+```
+
+---
+
+### Health Check (Infrastructure)
 
 ```
 GET /api/agent/health
@@ -62,15 +65,65 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-### Operational Status
+Response:
 
+```json
+{
+  "status": "healthy",
+  "checks": {
+    "redis": true,
+    "supabase": true
+  }
+}
 ```
+
+---
+
+### Operational Status Snapshot
+
+```text
 GET /api/agent/status
 Auth: Bearer
 Cost: 0 credits
 ```
 
-Returns actionable readiness snapshot: credits, social connections, schedule, knowledge base, and recommended actions.
+Response (shape excerpt):
+
+```json
+{
+  "summary": {
+    "operational_status": "attention",
+    "ready_to_create": true,
+    "ready_to_publish": false
+  },
+  "billing": {
+    "credits_available": 100,
+    "status": "low",
+    "topup_url": "https://www.citedy.com/dashboard/billing"
+  },
+  "social": {
+    "connected_count": 0,
+    "connect_url": "https://www.citedy.com/dashboard/settings?section=account&tab=integrations"
+  },
+  "knowledge": {
+    "documents_count": 0,
+    "add_documents_url": "https://www.citedy.com/dashboard/settings?section=blog&tab=knowledge"
+  },
+  "schedule": {
+    "scheduled_7d": 0,
+    "calendar_url": "https://www.citedy.com/dashboard/calendar"
+  },
+  "actions": [
+    {
+      "severity": "critical",
+      "title": "No social accounts connected",
+      "url": "https://www.citedy.com/dashboard/settings?section=account&tab=integrations"
+    }
+  ]
+}
+```
+
+---
 
 ### Rotate API Key
 
@@ -80,16 +133,52 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
+Response:
+
+```json
+{ "apiKey": "cty_new_..." }
+```
+
+---
+
 ## Settings
 
-### Get / Update Settings
+### Get Agent Settings
 
 ```
 GET /api/agent/settings
+Auth: Bearer
+Cost: 0 credits
+```
+
+Response: full AgentSettings object
+
+---
+
+### Update Agent Settings
+
+```
 PUT /api/agent/settings
 Auth: Bearer
 Cost: 0 credits
 ```
+
+
+
+
+Request: partial `AgentSettings` (any fields, all optional):
+
+```json
+{
+  "trustLevel": "show_preview",
+  "imageStylePreset": "tech",
+  "contentTone": "casual"
+}
+```
+
+Response: updated `AgentSettings`
+
+---
 
 ### Switch Image Style
 
@@ -99,7 +188,15 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
+Request:
+
+```json
+{ "style": "bold" }
+```
+
 Values: `minimal` | `tech` | `bold`
+
+---
 
 ## Content Creation
 
@@ -111,16 +208,43 @@ Auth: Bearer
 Cost: 2-4 credits
 ```
 
-Creates a social-only post with platform-specific adaptations.
+Creates a social-only post (does not go to blog). Generates social adaptation stubs per platform.
+
+Request:
 
 ```json
 {
   "topic": "AI agents changing how we code",
   "platforms": ["x_article", "linkedin"],
   "tone": "casual",
-  "imageStyle": "minimal"
+  "imageStyle": "tech",
+  "withImage": true
 }
 ```
+
+Response:
+
+```json
+{
+  "postId": "uuid",
+  "adaptations": [
+    {
+      "platform": "x_article",
+      "content": "AI agents are...",
+      "characterCount": 276
+    },
+    {
+      "platform": "linkedin",
+      "content": "The way we build software is changing...",
+      "characterCount": 892
+    }
+  ],
+  "imageUrl": "https://download.citedy.com/images/...",
+  "creditsCharged": 4
+}
+```
+
+---
 
 ### Generate Blog Article (Autopilot)
 
@@ -130,9 +254,20 @@ Auth: Bearer
 Cost: 4-48 credits (by size + intelligence)
 ```
 
-Sizes: `mini` (15 credits) | `standard` (20 credits) | `full` (33 credits) | `pillar` (48 credits)
+Request:
 
-Base cost includes SEO intelligence (+8 credits). Use `disable_competition: true` to skip and save 8 credits. Turbo mode: 2-4 credits.
+```json
+{
+  "topic": "Getting started with MCP",
+  "size": "standard",
+  "withIntelligence": true
+}
+```
+
+Sizes: `mini` (7credits) | `standard` (12credits) | `full` (25credits) | `pillar` (40credits)
+Plus CI intelligence: +8 credits
+
+---
 
 ### Create Social Adaptation
 
@@ -141,6 +276,20 @@ POST /api/agent/adapt
 Auth: Bearer
 Cost: 0-2 credits
 ```
+
+Adapt an existing article for specific social platforms.
+
+Request:
+
+```json
+{
+  "articleId": "uuid",
+  "platforms": ["linkedin", "x_thread"],
+  "tone": "professional"
+}
+```
+
+---
 
 ## Publishing & Scheduling
 
@@ -152,15 +301,77 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-Actions: `now` | `schedule` | `cancel`
+Request for immediate publish:
 
-### Get Schedule
+```json
+{
+  "contentId": "uuid",
+  "action": "now",
+  "platforms": ["x_article", "linkedin"]
+}
+```
+
+Request for scheduled publish:
+
+```json
+{
+  "contentId": "uuid",
+  "action": "schedule",
+  "scheduledAt": "2026-03-01T09:00:00-05:00",
+  "platforms": ["x_article", "linkedin"]
+}
+```
+
+Request to cancel:
+
+```json
+{
+  "contentId": "uuid",
+  "action": "cancel"
+}
+```
+
+Response:
+
+```json
+{
+  "status": "scheduled",
+  "scheduledAt": "2026-03-01T09:00:00-05:00",
+  "platforms": ["x_article", "linkedin"],
+  
+}
+```
+
+---
+
+### Get Schedule (Timeline)
 
 ```
 GET /api/agent/schedule
 Auth: Bearer
 Cost: 0 credits
 ```
+
+Query params: `from` (ISO date), `to` (ISO date)
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "title": "AI agents post",
+      "type": "post",
+      "status": "scheduled",
+      "scheduledAt": "2026-03-01T09:00:00-05:00",
+      "platforms": ["x_article", "linkedin"]
+    }
+  ]
+}
+```
+
+---
 
 ### Get Schedule Gaps
 
@@ -169,6 +380,44 @@ GET /api/agent/schedule/gaps
 Auth: Bearer
 Cost: 0 credits
 ```
+
+Returns days within the next 7 days that have fewer posts than `postsPerDay` setting.
+
+Response:
+
+```json
+{
+  "gaps": ["2026-03-02", "2026-03-04"],
+  "target": 2
+}
+```
+
+---
+
+### Get Suggested Posting Slots
+
+```
+GET /api/agent/schedule/suggest
+Auth: Bearer
+Cost: 0 credits
+```
+
+
+
+
+Returns optimal times for tenant's timezone based on best-practice engagement windows.
+
+Response:
+
+```json
+{
+  "timezone": "America/New_York",
+  "slots": ["09:00", "17:00"],
+  "rationale": "Peak engagement for US Eastern audience"
+}
+```
+
+---
 
 ## Trend Scanning
 
@@ -180,7 +429,47 @@ Auth: Bearer
 Cost: 2 / 4 / 6 / 8 credits (fast / deep / ultra / ultra+)
 ```
 
-Modes: `fast` (X only) | `deep` (X + Google) | `ultra` (X + Google + HackerNews) | `ultra+` (X + Google + HN + Reddit)
+Request:
+
+```json
+{
+  "query": "AI coding agents 2026",
+  "mode": "deep",
+  "limit": 10
+}
+```
+
+Mode values: `fast` | `deep` | `ultra` | `ultra+`
+Default mode derived from `scanSources` in Agent Settings if not specified.
+Max limit: 30
+
+Response:
+
+```json
+{
+  "results": [
+    {
+      "title": "Claude Code surpasses GitHub Copilot in adoption",
+      "summary": "New data shows...",
+      "url": "https://x.com/...",
+      "source": "x",
+      "relevance": 0.94,
+      "knowledgeMatch": {
+        "content": "Our MCP integration feature...",
+        "similarity": 0.87,
+        "document_id": "uuid"
+      }
+    }
+  ],
+  "mode": "deep",
+  "creditsCharged": 4,
+  "hnFailed": false
+}
+```
+
+`knowledgeMatch` is only present when tenant has product knowledge documents uploaded and a match is found.
+
+---
 
 ## Product Knowledge Base
 
@@ -192,17 +481,118 @@ Auth: Bearer
 Cost: 1 credit (text) / 2 credits (URL)
 ```
 
-### List / Delete / Search Documents
+Accepts text content or a URL. Content is chunked, embedded, and stored for semantic search.
+
+Request (text):
+
+```json
+{
+  "content": "Our product has an MCP integration that...",
+  "title": "MCP Integration Feature",
+  "type": "text"
+}
+```
+
+Request (URL):
+
+```json
+{
+  "url": "https://docs.yourproduct.com/mcp",
+  "title": "MCP Docs",
+  "type": "url"
+}
+```
+
+Response:
+
+```json
+{
+  "documentId": "uuid",
+  "chunks": 12,
+  "creditsCharged": 1
+}
+```
+
+---
+
+### List Documents
 
 ```
 GET /api/agent/products
+Auth: Bearer
+Cost: 0 credits
+```
+
+Response:
+
+```json
+{
+  "documents": [
+    {
+      "id": "uuid",
+      "title": "MCP Integration Feature",
+      "createdAt": "2026-02-20T10:00:00Z",
+      "chunks": 12,
+      "type": "text"
+    }
+  ],
+  "total": 1
+}
+```
+
+---
+
+### Delete Document
+
+```
 DELETE /api/agent/products/[id]
+Auth: Bearer
+Cost: 0 credits
+```
+
+Deletes document and all chunks. Tenant ownership verified before delete.
+
+Response: `204 No Content`
+
+---
+
+### Search Knowledge Base
+
+```
 POST /api/agent/products/search
 Auth: Bearer
 Cost: 0 credits
 ```
 
+Request:
+
+```json
+{
+  "query": "MCP integration",
+  "limit": 5
+}
+```
+
+Response:
+
+```json
+{
+  "results": [
+    {
+      "content": "Our MCP integration allows agents to...",
+      "similarity": 0.92,
+      "documentId": "uuid",
+      "documentTitle": "MCP Integration Feature"
+    }
+  ]
+}
+```
+
+---
+
 ## Video (Shorts)
+
+
 
 ### Generate Video
 
@@ -212,28 +602,259 @@ Auth: Bearer
 Cost: 60 / 130 / 185 credits (5s / 10s / 15s)
 ```
 
-Fire-and-forget. Returns `generationId`; poll `GET /api/agent/shorts/[id]` for status.
+Fire-and-forget. Returns `generationId` immediately; poll for status.
 
-### Generate Script / Avatar / Merge
+Request:
+
+```json
+{
+  "prompt": "An enthusiastic tech founder presenting MCP integration",
+  "avatarUrl": "https://download.citedy.com/avatars/...",
+  "duration": 15,
+  "aspectRatio": "9:16",
+  "speech_text": "AI agents can now control your entire workflow...",
+  "resolution": "1280x720"
+}
+```
+
+Response:
+
+```json
+{
+  "generationId": "uuid",
+  "status": "generating",
+  "pollUrl": "/api/agent/shorts/uuid"
+}
+```
+
+---
+
+### Poll Video Status
 
 ```
-POST /api/agent/shorts/script   (1 credit)
-POST /api/agent/shorts/avatar   (3 credits)
-POST /api/agent/shorts/merge    (5 credits)
+GET /api/agent/shorts/[id]
+Auth: Bearer
+Cost: 0 credits
 ```
+
+Response (generating):
+
+```json
+{ "status": "generating", "generationId": "uuid" }
+```
+
+Response (completed):
+
+```json
+{
+  "status": "completed",
+  "generationId": "uuid",
+  "videoUrl": "https://download.citedy.com/shorts/tenant/uuid.mp4",
+  "subtitlesApplied": true,
+  "subtitleWarning": null
+}
+```
+
+Response (failed):
+
+```json
+{
+  "status": "failed",
+  "generationId": "uuid",
+  "error": "Both video providers failed after retries"
+}
+```
+
+---
+
+### Generate Script
+
+```
+POST /api/agent/shorts/script
+Auth: Bearer
+Cost: 1 credit
+```
+
+
+
+
+Request:
+
+```json
+{
+  "topic": "MCP integration for AI coding agents",
+  "style": "hook",
+  "product_id": "a1b2c3d4-e5f6-4a7b-8c9d-e0f1a2b3c4d5",
+  "duration": "short",
+  "language": "en"
+}
+```
+
+Fields:
+
+- `topic`: string (required)
+- `style`: `hook` | `educational` | `cta` (default: `hook`)
+- `product_id`: UUID (optional) — link to a product knowledge document
+- `duration`: `short` | `long` (optional, default: `short`)
+- `language`: language code (optional, default: `"en"`)
+
+Response:
+
+```json
+{
+  "speechText": "Most developers don't know this yet...",
+  "hookLine": "Most developers don't know this yet",
+  "subtitlePhrases": [
+    { "text": "Most developers" },
+    { "text": "don't know this" },
+    { "text": "yet..." }
+  ],
+  "creditsCharged": 1
+}
+```
+
+---
+
+### Generate Avatar
+
+```
+POST /api/agent/shorts/avatar
+Auth: Bearer
+Cost: 3 credits
+```
+
+
+
+
+Request:
+
+```json
+{
+  "gender": "male",
+  "origin": "european",
+  "age_range": "26-35",
+  "type": "tech_founder",
+  "location": "coffee_shop"
+}
+```
+
+Fields:
+
+- `gender`: `male` | `female`
+- `origin`: `european` | `asian` | `african` | `latin` | `middle_eastern` | `south_asian`
+- `age_range`: `18-25` | `26-35` | `36-50` (default: `26-35`)
+- `type`: `tech_founder` | `vibe_coder` | `student` | `executive` (default: `tech_founder`)
+- `location`: `coffee_shop` | `dev_cave` | `street` | `car` | `home_office` | `podcast_studio` | `glass_office` | `rooftop` | `bedroom` | `park` | `gym` (default: `coffee_shop`)
+
+Response:
+
+```json
+{
+  "avatarUrl": "https://download.citedy.com/avatars/tenant/uuid.png",
+  
+  "creditsCharged": 3
+}
+```
+
+
+
+---
+
+### Merge Video Segments
+
+```
+POST /api/agent/shorts/merge
+Auth: Bearer
+Cost: 5 credits
+```
+
+
+
+
+Merges 2 or more video segments, trims silence, applies audio crossfade, renders subtitles.
+
+Request:
+
+```json
+{
+  "videoUrls": [
+    "https://download.citedy.com/shorts/.../part1.mp4",
+    "https://download.citedy.com/shorts/.../part2.mp4"
+  ],
+  "subtitlePhrases": [{ "text": "First phrase" }, { "text": "Second phrase" }]
+}
+```
+
+Response:
+
+```json
+{
+  "mergedVideoUrl": "https://download.citedy.com/shorts/tenant/merged-uuid.mp4",
+  "subtitlesApplied": true,
+  "creditsCharged": 5
+}
+```
+
+---
 
 ## Intelligence & Research
 
-| Endpoint | Cost |
-|---|---|
-| `GET /api/agent/gaps` | 0 credits |
-| `POST /api/agent/gaps/generate` | 40 credits |
-| `POST /api/agent/competitors/discover` | 20 credits |
-| `POST /api/agent/competitors/scout` | 25-50 credits |
-| `POST /api/agent/scout/x` | 35-70 credits |
-| `POST /api/agent/scout/reddit` | 30 credits |
+### Content Gaps Analysis
+
+```
+GET /api/agent/gaps
+POST /api/agent/gaps/generate
+Auth: Bearer
+Cost: 40 credits (generate)
+```
+
+---
+
+### Competitor Discovery
+
+```
+POST /api/agent/competitors/discover
+Auth: Bearer
+Cost: 20 credits
+```
+
+---
+
+### Competitor Scout
+
+```
+POST /api/agent/competitors/scout
+Auth: Bearer
+Cost: 25 credits (fast) / 50 credits (ultimate)
+```
+
+---
+
+### X Intent Scout
+
+```
+POST /api/agent/scout/x
+GET  /api/agent/scout/x/[runId]
+Auth: Bearer
+Cost: 35 / 70 credits (fast / ultimate)
+```
+
+---
+
+### Reddit Intent Scout
+
+```
+POST /api/agent/scout/reddit
+GET  /api/agent/scout/reddit/[runId]
+Auth: Bearer
+Cost: 30 credits
+```
+
+---
 
 ## Content Ingestion
+
+### Ingest URL / Video
 
 ```
 POST /api/agent/ingest
@@ -241,9 +862,74 @@ Auth: Bearer
 Cost: 1-55 credits (by content type and duration)
 ```
 
-Types: `web_article` (1 credits) | `pdf_document` (2 credits) | `youtube_video` (5-55 credits) | `audio_file` (3-30 credits)
+Request:
+
+```json
+{
+  "url": "https://youtube.com/watch?v=...",
+  "type": "youtube_video"
+}
+```
+
+Types and costs:
+
+- `web_article`: 1credits
+- `pdf_document`: 2credits
+- `youtube_video`: 5-55credits (by duration)
+- `audio_file`: 3-30credits (by duration)
+
+---
+
+### Get Ingested Content
+
+```
+GET  /api/agent/ingest/[id]
+GET  /api/agent/ingest/[id]/content
+Auth: Bearer
+Cost: 0 credits
+```
+
+---
+
+## Lead Magnets
+
+### Generate Lead Magnet
+
+```
+POST /api/agent/lead-magnets
+Auth: Bearer
+Cost: 30 credits (text only) / 100 credits (with images)
+```
+
+Types: `checklist` | `swipe_file` | `framework`
+
+---
+
+### Get Lead Magnet
+
+```
+GET /api/agent/lead-magnets/[id]
+Auth: Bearer
+Cost: 0 credits
+```
+
+---
+
+## Personas
+
+### List Personas
+
+```
+GET  /api/agent/personas
+Auth: Bearer
+Cost: 0 credits
+```
+
+---
 
 ## Webhooks
+
+### Manage Webhooks
 
 ```
 GET    /api/agent/webhooks
@@ -254,15 +940,39 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-Events: `post.published`, `post.scheduled`, `video.completed`, `video.failed`, `scan.completed`
+Webhook events: `post.published`, `post.scheduled`, `video.completed`, `video.failed`, `scan.completed`
+
+---
 
 ## Error Responses
 
-| HTTP | Code | Meaning |
-|---|---|---|
-| 400 | VALIDATION_ERROR | Invalid request body |
-| 401 | UNAUTHORIZED | Missing or invalid API key |
-| 402 | INSUFFICIENT_CREDITS | Not enough credits |
-| 403 | FORBIDDEN | Resource belongs to another tenant |
-| 429 | RATE_LIMITED | Too many requests |
-| 503 | SERVICE_UNAVAILABLE | Provider unavailable |
+All errors follow:
+
+```json
+{
+  "error": "Description of the error",
+  "code": "ERROR_CODE"
+}
+```
+
+Common codes:
+
+| HTTP | Code                 | Meaning                                |
+| ---- | -------------------- | -------------------------------------- |
+| 400  | VALIDATION_ERROR     | Invalid request body                   |
+| 401  | UNAUTHORIZED         | Missing or invalid API key             |
+| 402  | INSUFFICIENT_CREDITS | Not enough credits                     |
+| 403  | FORBIDDEN            | Resource belongs to another tenant     |
+| 429  | RATE_LIMITED         | Too many requests                      |
+| 503  | SERVICE_UNAVAILABLE  | External provider unavailable |
+
+Insufficient credits response also includes:
+
+```json
+{
+  "error": "Insufficient credits",
+  "required": 60,
+  "available": 10,
+  "topUpUrl": "https://www.citedy.com/dashboard/billing"
+}
+```
