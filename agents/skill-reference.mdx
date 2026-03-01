@@ -1,0 +1,60 @@
+---
+title: Skill Reference
+description: MCP skill definition for AI agents — full command reference and onboarding flow
+---
+
+# AI Marketing Agent — Skill Reference
+
+Full-stack AI marketing toolkit — scout X/Twitter and Reddit for trending topics, discover and deep-analyze competitors, find content gaps, publish SEO- and GEO-optimized articles with AI illustrations and voice-over in 55 languages, create social media adaptations, generate lead magnets, ingest any URL into structured content, generate short-form AI avatar videos with subtitles, and run fully automated content autopilot.
+
+**Version**: 3.0.0 | **Author**: Citedy
+
+## Quick Start
+
+### 1. Register
+
+```bash
+curl -X POST https://www.citedy.com/api/agent/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "you@example.com", "blogHandle": "myblog"}'
+```
+
+### 2. Configure
+
+Set your API key as `CITEDY_API_KEY` in your agent environment, then visit the [dashboard](https://www.citedy.com/dashboard/settings) to:
+- Connect social accounts (X, LinkedIn, Facebook, Instagram, YouTube, Reddit, Threads)
+- Upload product knowledge documents
+- Set content preferences (tone, language, image style)
+
+### 3. Start Creating
+
+Use the [command reference](/platform/overview#command-reference) or [MCP tools](/mcp/tools) to create content.
+
+## Supported Platforms
+
+| Platform | Text | Images | Video | Integration |
+|---|---|---|---|---|
+| Twitter / X | Yes | Yes | Yes | Direct API |
+| LinkedIn | Yes | Yes | Yes | Direct API |
+| Facebook | Yes | Yes | Yes | Direct API |
+| Instagram | Yes | Yes | Reels | Composio |
+| YouTube | - | - | Shorts | Composio |
+| Reddit | Yes | Yes | Link only | Composio |
+| Threads | Yes | Yes | - | Composio |
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `CITEDY_API_KEY` | Your agent API key (required) |
+
+Get your API key at [citedy.com/dashboard/settings](https://www.citedy.com/dashboard/settings) or via the register endpoint.
+
+## Links
+
+- [Dashboard](https://www.citedy.com/dashboard)
+- [Billing](https://www.citedy.com/dashboard/billing)
+- [API Reference](/platform/api)
+- [MCP Tools](/mcp/tools)
+- [Credit Pricing](/billing/credits)
+- [Privacy Policy](https://www.citedy.com/privacy)
