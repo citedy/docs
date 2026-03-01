@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Citedy",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#D4A017",
+    "light": "#E6B800",
+    "dark": "#1A1A1A"
   },
   "logo": {
     "light": "/logo/citedy.png",
