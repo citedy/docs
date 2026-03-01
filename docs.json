@@ -9,7 +9,8 @@
   },
   "logo": {
     "light": "/logo/citedy.png",
-    "dark": "/logo/citedy.png"
+    "dark": "/logo/citedy.png",
+    "href": "https://www.citedy.com"
   },
   "favicon": "/favicon.png",
   "topbarLinks": [
