@@ -1,0 +1,118 @@
+---
+title: Credit Pricing
+description: Pay-as-you-go credit packages and operation costs
+---
+
+# Credit Pricing
+
+**Credit value**: 1 credit = $0.01 USD
+
+## Credit Packages
+
+| Package | Credits | Price | Per Credit | Discount |
+|---|---|---|---|---|
+| Starter | 500 | $5.99 | $0.012 | 0% |
+| Growth | 1,500 | $14.99 | $0.010 | 17% (popular) |
+| Pro | 4,500 | $39.99 | $0.0089 | 26% |
+| Business | 14,000 | $99.99 | $0.0071 | 29% |
+
+New users receive **100 free credits** on registration.
+
+Top-up: [citedy.com/dashboard/billing](https://www.citedy.com/dashboard/billing)
+
+## Operation Costs
+
+### Content Creation
+
+| Operation | Credits | Notes |
+|---|---|---|
+| Micro-post (turbo, no search) | 2 cr | ~800 words, social only |
+| Micro-post (turbo+, with search) | 4 cr | web + X search enrichment |
+| Article mini (800-1,200 words) | 7 cr | |
+| Article standard (1,500-2,500 words) | 12 cr | |
+| Article full (3,000-5,000 words) | 25 cr | |
+| Article pillar (5,000-8,000 words) | 40 cr | |
+| + SEO intelligence | +8 cr | DataForSEO + competitor analysis |
+
+### Video (Shorts)
+
+| Operation | Credits |
+|---|---|
+| Video 5 seconds | 60 cr |
+| Video 10 seconds | 130 cr |
+| Video 15 seconds | 185 cr |
+| Script generation | 1 cr |
+| Avatar generation | 3 cr |
+| Merge + subtitles | 5 cr |
+
+### Trend Scanning
+
+| Mode | Sources | Credits |
+|---|---|---|
+| fast | X only | 2 cr |
+| deep | X + Google | 4 cr |
+| ultra | X + Google + HackerNews | 6 cr |
+| ultra+ | X + Google + HN + Reddit | 8 cr |
+
+### Intelligence & Research
+
+| Operation | Credits |
+|---|---|
+| Content gaps analysis | 40 cr |
+| Competitor discovery | 20 cr |
+| Competitor scout (fast) | 25 cr |
+| Competitor scout (ultimate) | 50 cr |
+| X Intent Scout (fast) | 35 cr |
+| X Intent Scout (ultimate) | 70 cr |
+| Reddit Intent Scout | 30 cr |
+
+### Knowledge Base
+
+| Operation | Credits |
+|---|---|
+| Upload + vectorize document | 1 cr |
+| URL fetch + extract | 2 cr |
+| List / Delete / Search | 0 cr |
+
+### Publishing & Scheduling
+
+| Operation | Credits |
+|---|---|
+| Publish (any platform) | 0 cr |
+| Schedule / Reschedule / Cancel | 0 cr |
+| YouTube Shorts publish | 5 cr |
+| Instagram Reels publish | 5 cr |
+
+### Content Ingestion
+
+| Type | Credits | Duration |
+|---|---|---|
+| Web article | 1 cr | any |
+| PDF document | 2 cr | any |
+| YouTube video (short) | 5 cr | < 10 min |
+| YouTube video (medium) | 15 cr | 10-30 min |
+| YouTube video (long) | 30 cr | 30-60 min |
+| YouTube video (extra) | 55 cr | 60-120 min |
+
+### Images & Voice
+
+| Operation | Credits |
+|---|---|
+| Blog illustration | 9 cr |
+| OG image | 10 cr |
+| Blog avatar | 10 cr |
+| Voice-over mini | 10 cr |
+| Voice-over standard | 20 cr |
+| Voice-over full | 35 cr |
+| Voice-over pillar | 55 cr |
+
+## Pre-Charge Pattern
+
+All paid operations use a pre-charge → refund pattern:
+
+1. Check balance >= required cost
+2. Charge credits atomically (TOCTOU-safe)
+3. Execute operation
+4. On failure: automatic refund via `safeRefund()`
+
+If your balance is insufficient, you'll receive a `402` response with a top-up link.
