@@ -4,8 +4,6 @@ description: Complete Agent API endpoint reference — methods, paths, auth, cos
 openapi: api-reference/openapi.json
 ---
 
-# Agent Platform — API Reference
-
 All endpoints require:
 
 ```
@@ -31,8 +29,8 @@ Request:
 
 ```json
 {
-  "email": "user@example.com",
-  "blogHandle": "myblog"
+  "agent_name": "my-agent",
+  "description": "Optional description (max 500 chars)"
 }
 ```
 
@@ -40,11 +38,13 @@ Response:
 
 ```json
 {
-  "apiKey": "cty_...",
-  "tenantId": "uuid",
-  "domain": "myblog.citedy.com"
+  "pending_id": "...",
+  "approval_url": "https://www.citedy.com/approve-agent/...",
+  "expires_in": 3600
 }
 ```
+
+The registration requires human approval. Open `approval_url` in browser to approve and receive API key.
 
 ### Get Agent Info
 
