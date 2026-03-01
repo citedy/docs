@@ -11,7 +11,7 @@
     "light": "/logo/citedy.png",
     "dark": "/logo/citedy.png"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.png",
   "topbarLinks": [
     {
       "name": "Dashboard",
