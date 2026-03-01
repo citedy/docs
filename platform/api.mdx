@@ -1,0 +1,267 @@
+---
+title: API Reference
+description: Complete Agent API endpoint reference — methods, paths, auth, costs, and examples
+openapi: api-reference/openapi.json
+---
+
+# Agent Platform — API Reference
+
+All endpoints require:
+
+```
+Authorization: Bearer <AGENT_API_KEY>
+Content-Type: application/json
+```
+
+Base URL: `https://www.citedy.com`
+
+Credit value: 1 credit = $0.01 USD
+
+## Account & Auth
+
+### Register Agent
+
+```
+POST /api/agent/register
+Auth: none (public)
+Cost: 0 credits
+```
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "blogHandle": "myblog"
+}
+```
+
+Response:
+
+```json
+{
+  "apiKey": "cty_...",
+  "tenantId": "uuid",
+  "domain": "myblog.citedy.com"
+}
+```
+
+### Get Agent Info
+
+```
+GET /api/agent/me
+Auth: Bearer
+Cost: 0 credits
+```
+
+### Health Check
+
+```
+GET /api/agent/health
+Auth: Bearer
+Cost: 0 credits
+```
+
+### Operational Status
+
+```
+GET /api/agent/status
+Auth: Bearer
+Cost: 0 credits
+```
+
+Returns actionable readiness snapshot: credits, social connections, schedule, knowledge base, and recommended actions.
+
+### Rotate API Key
+
+```
+POST /api/agent/rotate-key
+Auth: Bearer
+Cost: 0 credits
+```
+
+## Settings
+
+### Get / Update Settings
+
+```
+GET /api/agent/settings
+PUT /api/agent/settings
+Auth: Bearer
+Cost: 0 credits
+```
+
+### Switch Image Style
+
+```
+PUT /api/agent/image-style
+Auth: Bearer
+Cost: 0 credits
+```
+
+Values: `minimal` | `tech` | `bold`
+
+## Content Creation
+
+### Create Micro-Post
+
+```
+POST /api/agent/post
+Auth: Bearer
+Cost: 2-4 credits
+```
+
+Creates a social-only post with platform-specific adaptations.
+
+```json
+{
+  "topic": "AI agents changing how we code",
+  "platforms": ["x_article", "linkedin"],
+  "tone": "casual",
+  "withImage": true
+}
+```
+
+### Generate Blog Article (Autopilot)
+
+```
+POST /api/agent/autopilot
+Auth: Bearer
+Cost: 4-48 credits (by size + intelligence)
+```
+
+Sizes: `mini` (7 cr) | `standard` (12 cr) | `full` (25 cr) | `pillar` (40 cr)
+Plus CI intelligence: +8 credits
+
+### Create Social Adaptation
+
+```
+POST /api/agent/adapt
+Auth: Bearer
+Cost: 0-2 credits
+```
+
+## Publishing & Scheduling
+
+### Publish Content
+
+```
+POST /api/agent/publish
+Auth: Bearer
+Cost: 0 credits
+```
+
+Actions: `now` | `schedule` | `cancel`
+
+### Get Schedule
+
+```
+GET /api/agent/schedule
+Auth: Bearer
+Cost: 0 credits
+```
+
+### Get Schedule Gaps
+
+```
+GET /api/agent/schedule/gaps
+Auth: Bearer
+Cost: 0 credits
+```
+
+## Trend Scanning
+
+### Scan Trends
+
+```
+POST /api/agent/scan
+Auth: Bearer
+Cost: 2 / 4 / 6 / 8 credits (fast / deep / ultra / ultra+)
+```
+
+Modes: `fast` (X only) | `deep` (X + Google) | `ultra` (X + Google + HackerNews) | `ultra+` (X + Google + HN + Reddit)
+
+## Product Knowledge Base
+
+### Upload Document
+
+```
+POST /api/agent/products
+Auth: Bearer
+Cost: 1 credit (text) / 2 credits (URL)
+```
+
+### List / Delete / Search Documents
+
+```
+GET /api/agent/products
+DELETE /api/agent/products/[id]
+POST /api/agent/products/search
+Auth: Bearer
+Cost: 0 credits
+```
+
+## Video (Shorts)
+
+### Generate Video
+
+```
+POST /api/agent/shorts
+Auth: Bearer
+Cost: 60 / 130 / 185 credits (5s / 10s / 15s)
+```
+
+Fire-and-forget. Returns `generationId`; poll `GET /api/agent/shorts/[id]` for status.
+
+### Generate Script / Avatar / Merge
+
+```
+POST /api/agent/shorts/script   (1 credit)
+POST /api/agent/shorts/avatar   (3 credits)
+POST /api/agent/shorts/merge    (5 credits)
+```
+
+## Intelligence & Research
+
+| Endpoint | Cost |
+|---|---|
+| `GET /api/agent/gaps` | 0 cr |
+| `POST /api/agent/gaps/generate` | 40 cr |
+| `POST /api/agent/competitors/discover` | 20 cr |
+| `POST /api/agent/competitors/scout` | 25-50 cr |
+| `POST /api/agent/scout/x` | 35-70 cr |
+| `POST /api/agent/scout/reddit` | 30 cr |
+
+## Content Ingestion
+
+```
+POST /api/agent/ingest
+Auth: Bearer
+Cost: 1-55 credits (by content type and duration)
+```
+
+Types: `web_article` (1 cr) | `pdf_document` (2 cr) | `youtube_video` (5-55 cr) | `audio_file` (3-30 cr)
+
+## Webhooks
+
+```
+GET    /api/agent/webhooks
+POST   /api/agent/webhooks
+DELETE /api/agent/webhooks/[id]
+GET    /api/agent/webhooks/deliveries
+Auth: Bearer
+Cost: 0 credits
+```
+
+Events: `post.published`, `post.scheduled`, `video.completed`, `video.failed`, `scan.completed`
+
+## Error Responses
+
+| HTTP | Code | Meaning |
+|---|---|---|
+| 400 | VALIDATION_ERROR | Invalid request body |
+| 401 | UNAUTHORIZED | Missing or invalid API key |
+| 402 | INSUFFICIENT_CREDITS | Not enough credits |
+| 403 | FORBIDDEN | Resource belongs to another tenant |
+| 429 | RATE_LIMITED | Too many requests |
+| 503 | SERVICE_UNAVAILABLE | Provider unavailable |
