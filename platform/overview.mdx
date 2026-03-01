@@ -1,0 +1,132 @@
+---
+title: Platform Overview
+description: Citedy Agent Platform — architecture, authentication, and capabilities
+---
+
+**Version**: 1.7.0 | **Status**: Production | **Updated**: 2026-02-28
+
+Citedy is a backend service for AI agents. Connect once, configure defaults in the web UI, and let any agent — OpenClaw, Claude Code, Cursor, ChatGPT, or any MCP-compatible client — write posts, generate images, publish to social platforms, scan trends, and produce short-form video.
+
+The web UI is for settings and scheduling review. The agent does the work.
+
+---
+
+## Who Is This For
+
+- Vibe-coders and solo founders who already use AI agents daily
+- Micro-companies that want content automation without agency overhead
+- Developers building agent workflows on top of a reliable content + publish API
+
+Not for: agencies, enterprise, or anyone who wants a web chat interface.
+
+---
+
+## Quick Start for Agents
+
+```
+1. Register: POST /api/agent/register  (or use SKILL.md onboarding)
+2. Infra health: GET /api/agent/health
+3. Operational status: GET /api/agent/status
+4. Configure defaults: GET /api/agent/settings (update via web UI or PUT API)
+5. Create a post: POST /api/agent/post
+6. Publish it: POST /api/agent/publish
+```
+
+Operational response from `/api/agent/status`:
+
+```text
+summary.operational_status: attention
+billing.credits_available: 100
+social.connected_count: 0                  -> https://www.citedy.com/dashboard/settings?section=account&tab=integrations
+knowledge.documents_count: 0               -> https://www.citedy.com/dashboard/settings?section=blog&tab=knowledge
+schedule.scheduled_7d: 0                   -> https://www.citedy.com/dashboard/calendar
+content.total_items: 0                     -> /post or /write
+```
+
+---
+
+
+---
+
+## Command Reference (Quick)
+
+| Agent Command      | API Call                           | Cost      |
+| ------------------ | ---------------------------------- | --------- |
+| `/post <topic>`    | POST /api/agent/post               | 2-4 credits    |
+| `/write <topic>`   | POST /api/agent/autopilot          | 4-8 credits    |
+| `/shorts <prompt>` | POST /api/agent/shorts             | 60-185 credits |
+| `/shorts script`   | POST /api/agent/shorts/script      | 1 credit      |
+| `/shorts avatar`   | POST /api/agent/shorts/avatar      | 3 credits      |
+| `/shorts merge`    | POST /api/agent/shorts/merge       | 5 credits      |
+| `/publish now`     | POST /api/agent/publish            | 0 credits      |
+| `/schedule list`   | GET /api/agent/schedule            | 0 credits      |
+| `/schedule gaps`   | GET /api/agent/schedule/gaps       | 0 credits      |
+| `/scan fast`       | POST /api/agent/scan (mode=fast)   | 2 credits      |
+| `/scan deep`       | POST /api/agent/scan (mode=deep)   | 4 credits      |
+| `/scan ultra`      | POST /api/agent/scan (mode=ultra)  | 6 credits      |
+| `/scan ultra+`     | POST /api/agent/scan (mode=ultra+) | 8 credits      |
+| `/products upload` | POST /api/agent/products           | 1 credit      |
+| `/products list`   | GET /api/agent/products            | 0 credits      |
+| `/products search` | POST /api/agent/products/search    | 0 credits      |
+| `/image-style`     | PUT /api/agent/image-style         | 0 credits      |
+| `/status`          | GET /api/agent/status              | 0 credits      |
+| `/settings`        | GET /api/agent/settings            | 0 credits      |
+
+These commands describe the full Agent API surface.
+Public MCP v1 intentionally exposes a smaller tool set (see below).
+
+---
+
+## MCP v1 Tool Surface (Public)
+
+MCP v1 is outcome-first. The goal is to expose stable high-value workflows, not every internal pipeline step.
+
+| MCP Tool              | Backend API Path                     | Notes                          |
+| --------------------- | ------------------------------------ | ------------------------------ |
+| `agent.health`        | `GET /api/agent/health`              | Core diagnostics               |
+| `agent.status`        | `GET /api/agent/status`              | Actionable readiness snapshot  |
+| `settings.get`        | `GET /api/agent/settings`            | Read settings in-agent         |
+| `schedule.gaps`       | `GET /api/agent/schedule/gaps`       | Planning visibility            |
+| `webhooks.deliveries` | `GET /api/agent/webhooks/deliveries` | Delivery debugging             |
+| `products.create`     | `POST /api/agent/products`           | Upload product doc             |
+| `products.list`       | `GET /api/agent/products`            | List product docs              |
+| `products.delete`     | `DELETE /api/agent/products/[id]`    | Remove product doc             |
+| `products.search`     | `POST /api/agent/products/search`    | Search knowledge chunks        |
+| `shorts.generate`     | `POST /api/agent/shorts`             | Returns processing + poll hint |
+| `shorts.get`          | `GET /api/agent/shorts/[id]`         | Poll final video status/url    |
+
+Advanced/deferred for MCP public exposure:
+
+- `settings.update` (safe-field policy needed; web-first by default)
+- `schedule.suggest` (heuristic helper, not a critical contract)
+- `shorts.script`, `shorts.avatar`, `shorts.merge` (internal pipeline steps)
+
+---
+
+## Authentication
+
+All agent endpoints require:
+
+```
+Authorization: Bearer <AGENT_API_KEY>
+```
+
+Obtain your key at `citedy.com/dashboard/settings` or via `POST /api/agent/register`.
+
+Key rotation: `POST /api/agent/rotate-key`
+
+---
+
+## Platform Support Matrix
+
+| Platform    | Text | Images | Video          |
+| ----------- | ---- | ------ | -------------- |
+| Twitter / X | Yes  | Yes    | Yes            |
+| LinkedIn    | Yes  | Yes    | Yes            |
+| Facebook    | Yes  | Yes    | Yes            |
+| Instagram   | Yes  | Yes    | Reels          |
+| YouTube     | -    | -      | Shorts         |
+| Reddit      | Yes  | Yes    | No (link only) |
+| Threads     | Yes  | Yes    | -              |
+
+---
