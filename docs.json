@@ -85,7 +85,8 @@
               "PUT /api/agent/settings",
               "PUT /api/agent/image-style",
               "GET /api/agent/personas"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Content Creation",
@@ -95,7 +96,8 @@
               "GET /api/agent/articles",
               "POST /api/agent/adapt",
               "POST /api/agent/session"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Publishing & Scheduling",
@@ -104,7 +106,8 @@
               "GET /api/agent/schedule",
               "GET /api/agent/schedule/gaps",
               "GET /api/agent/schedule/suggest"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Trend Scanning",
@@ -114,7 +117,8 @@
               "GET /api/agent/scout/x/{runId}",
               "POST /api/agent/scout/reddit",
               "GET /api/agent/scout/reddit/{runId}"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Intelligence",
@@ -123,7 +127,8 @@
               "POST /api/agent/gaps/generate",
               "POST /api/agent/competitors/discover",
               "POST /api/agent/competitors/scout"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Knowledge Base",
@@ -132,7 +137,8 @@
               "GET /api/agent/products",
               "DELETE /api/agent/products/{id}",
               "POST /api/agent/products/search"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Content Ingestion",
@@ -142,14 +148,16 @@
               "GET /api/agent/ingest/{id}",
               "GET /api/agent/ingest/{id}/content",
               "POST /api/agent/ingest/batch"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Video (Shorts)",
             "pages": [
               "POST /api/agent/shorts",
               "GET /api/agent/shorts/{id}"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Lead Magnets",
@@ -157,7 +165,8 @@
               "POST /api/agent/lead-magnets",
               "GET /api/agent/lead-magnets/{id}",
               "PATCH /api/agent/lead-magnets/{id}"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           },
           {
             "group": "Webhooks",
@@ -166,10 +175,10 @@
               "GET /api/agent/webhooks",
               "GET /api/agent/webhooks/deliveries",
               "DELETE /api/agent/webhooks/{id}"
-            ]
+            ],
+            "openapi": "api-reference/openapi.json"
           }
-        ],
-        "openapi": "api-reference/openapi.json"
+        ]
       }
     ]
   },
