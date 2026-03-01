@@ -168,7 +168,8 @@
               "DELETE /api/agent/webhooks/{id}"
             ]
           }
-        ]
+        ],
+        "openapi": "api-reference/openapi.json"
       }
     ]
   },
