@@ -3,27 +3,25 @@ title: Quick Start
 description: Register and make your first API call in 2 minutes
 ---
 
-# Quick Start
-
 ## 1. Register
 
 ```bash
 curl -X POST https://www.citedy.com/api/agent/register \
   -H "Content-Type: application/json" \
-  -d '{"email": "you@example.com", "blogHandle": "myblog"}'
+  -d '{"agent_name": "my-agent"}'
 ```
 
 Response:
 
 ```json
 {
-  "apiKey": "cty_...",
-  "tenantId": "uuid",
-  "domain": "myblog.citedy.com"
+  "pending_id": "...",
+  "approval_url": "https://www.citedy.com/approve-agent/...",
+  "expires_in": 3600
 }
 ```
 
-Save your `apiKey` — you'll need it for all subsequent requests.
+Open `approval_url` in browser, approve the agent, and copy the API key shown on the page.
 
 ## 2. Check Health
 
@@ -39,7 +37,7 @@ curl https://www.citedy.com/api/agent/status \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
-This returns an actionable snapshot: credit balance, connected social accounts, schedule gaps, and recommended next actions.
+Returns an actionable snapshot: credit balance, connected social accounts, schedule gaps, and recommended next actions.
 
 ## 4. Create Your First Post
 
@@ -62,9 +60,10 @@ curl -X POST https://www.citedy.com/api/agent/publish \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "contentId": "POST_ID_FROM_STEP_4",
+    "adaptationId": "ADAPTATION_ID_FROM_STEP_4",
     "action": "now",
-    "platforms": ["x_article", "linkedin"]
+    "platform": "linkedin",
+    "accountId": "YOUR_ACCOUNT_UUID"
   }'
 ```
 
