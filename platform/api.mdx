@@ -4,6 +4,41 @@ description: Complete Agent API endpoint reference — methods, paths, auth, cos
 openapi: api-reference/openapi.json
 ---
 
+# Agent Platform — API Reference
+
+All endpoints require:
+
+```
+Authorization: Bearer <AGENT_API_KEY>
+Content-Type: application/json
+```
+
+Base URL: `https://www.citedy.com`
+
+Credit value: 1 credit = $0.01 USD
+
+---
+
+## MCP v1 Exposure Policy (Public)
+
+This file documents the full Agent API.
+Public MCP v1 intentionally exposes a smaller, outcome-first subset:
+
+- `GET /api/agent/health`
+- `GET /api/agent/status`
+- `GET /api/agent/settings`
+- `GET /api/agent/schedule/gaps`
+- `GET /api/agent/webhooks/deliveries`
+- `POST /api/agent/products`
+- `GET /api/agent/products`
+- `DELETE /api/agent/products/[id]`
+- `POST /api/agent/products/search`
+- `POST /api/agent/shorts`
+- `GET /api/agent/shorts/[id]`
+
+Not in public MCP v1 (still available in Agent API): `PUT /api/agent/settings`, `GET /api/agent/schedule/suggest`, `POST /api/agent/shorts/script`, `POST /api/agent/shorts/avatar`, `POST /api/agent/shorts/merge`.
+
+---
 
 ## Account & Auth
 
@@ -19,8 +54,8 @@ Request:
 
 ```json
 {
-  "agent_name": "my-agent",
-  "description": "Optional description"
+  "email": "user@example.com",
+  "blogHandle": "myblog"
 }
 ```
 
@@ -28,9 +63,9 @@ Response:
 
 ```json
 {
-  "pending_id": "...",
-  "approval_url": "https://www.citedy.com/approve-agent/...",
-  "expires_in": 3600
+  "apiKey": "cty_...",
+  "tenantId": "uuid",
+  "domain": "myblog.citedy.com"
 }
 ```
 
@@ -71,8 +106,8 @@ Response:
 {
   "status": "healthy",
   "checks": {
-    "cache": true,
-    "database": true
+    "redis": true,
+    "supabase": true
   }
 }
 ```
@@ -151,7 +186,7 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-Response: full AgentSettings object
+Response: full `AgentSettings` object (see [SETTINGS.md](./SETTINGS.md))
 
 ---
 
@@ -163,8 +198,8 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-
-
+API availability: yes.
+MCP v1 public exposure: advanced/deferred (web-first by default).
 
 Request: partial `AgentSettings` (any fields, all optional):
 
@@ -264,7 +299,7 @@ Request:
 }
 ```
 
-Sizes: `mini` (7credits) | `standard` (12credits) | `full` (25credits) | `pillar` (40credits)
+Sizes: `mini` (7 cr) | `standard` (12 cr) | `full` (25 cr) | `pillar` (40 cr)
 Plus CI intelligence: +8 credits
 
 ---
@@ -337,7 +372,8 @@ Response:
 {
   "status": "scheduled",
   "scheduledAt": "2026-03-01T09:00:00-05:00",
-  "platforms": ["x_article", "linkedin"]
+  "platforms": ["x_article", "linkedin"],
+  "qstashMessageId": "msg_..."
 }
 ```
 
@@ -401,8 +437,8 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-
-
+API availability: yes.
+MCP v1 public exposure: advanced/deferred.
 
 Returns optimal times for tenant's timezone based on best-practice engagement windows.
 
@@ -480,7 +516,7 @@ Auth: Bearer
 Cost: 1 credit (text) / 2 credits (URL)
 ```
 
-Accepts text content or a URL. Content is chunked, embedded, and stored for semantic search.
+Accepts text content or a URL. Content is chunked, embedded (Gemini), and stored in pgvector.
 
 Request (text):
 
@@ -549,7 +585,7 @@ Auth: Bearer
 Cost: 0 credits
 ```
 
-Deletes document and all chunks. Tenant ownership verified before delete.
+Deletes document, all chunks, and Redis cache. Tenant ownership verified before delete.
 
 Response: `204 No Content`
 
@@ -591,7 +627,7 @@ Response:
 
 ## Video (Shorts)
 
-
+See [SHORTS-PIPELINE.md](./SHORTS-PIPELINE.md) for full pipeline documentation.
 
 ### Generate Video
 
@@ -674,8 +710,8 @@ Auth: Bearer
 Cost: 1 credit
 ```
 
-
-
+API availability: yes.
+MCP v1 public exposure: no (internal pipeline step).
 
 Request:
 
@@ -722,8 +758,8 @@ Auth: Bearer
 Cost: 3 credits
 ```
 
-
-
+API availability: yes.
+MCP v1 public exposure: no (internal pipeline step).
 
 Request:
 
@@ -750,11 +786,12 @@ Response:
 ```json
 {
   "avatarUrl": "https://download.citedy.com/avatars/tenant/uuid.png",
+  "provider": "gemini",
   "creditsCharged": 3
 }
 ```
 
-
+Provider chain: `gemini` → `openai-high` → `bytedance` → `zai`
 
 ---
 
@@ -766,8 +803,8 @@ Auth: Bearer
 Cost: 5 credits
 ```
 
-
-
+API availability: yes.
+MCP v1 public exposure: no (internal pipeline step).
 
 Merges 2 or more video segments, trims silence, applies audio crossfade, renders subtitles.
 
@@ -871,10 +908,10 @@ Request:
 
 Types and costs:
 
-- `web_article`: 1credits
-- `pdf_document`: 2credits
-- `youtube_video`: 5-55credits (by duration)
-- `audio_file`: 3-30credits (by duration)
+- `web_article`: 1 cr
+- `pdf_document`: 2 cr
+- `youtube_video`: 5-55 cr (by duration)
+- `audio_file`: 3-30 cr (by duration)
 
 ---
 
@@ -962,7 +999,7 @@ Common codes:
 | 402  | INSUFFICIENT_CREDITS | Not enough credits                     |
 | 403  | FORBIDDEN            | Resource belongs to another tenant     |
 | 429  | RATE_LIMITED         | Too many requests                      |
-| 503  | SERVICE_UNAVAILABLE  | External provider unavailable |
+| 503  | SERVICE_UNAVAILABLE  | Redis or external provider unavailable |
 
 Insufficient credits response also includes:
 
