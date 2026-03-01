@@ -1,0 +1,111 @@
+---
+title: MCP Tools Reference
+description: Complete list of 38 MCP tools available via the Citedy MCP server
+---
+
+# MCP Tools Reference
+
+The Citedy MCP server exposes 38 tools. Each tool maps to one or more Agent API endpoints.
+
+## Content Creation
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `article.generate` | Generate a new article using autopilot | POST /api/agent/autopilot |
+| `article.list` | List previously generated articles | GET /api/agent/articles |
+| `adapt.generate` | Generate social adaptations for an article | POST /api/agent/adapt |
+
+## Lead Magnets
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `leadmagnet.generate` | Start lead magnet generation (checklist/swipe/framework) | POST /api/agent/lead-magnets |
+| `leadmagnet.get` | Fetch lead magnet status/result by ID | GET /api/agent/lead-magnets/[id] |
+| `leadmagnet.publish` | Publish a lead magnet | PATCH /api/agent/lead-magnets/[id] |
+| `leadmagnet.archive` | Archive a lead magnet | PATCH /api/agent/lead-magnets/[id] |
+
+## Trend Scouting
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `scout.x` | Run X/Twitter scout analysis | POST /api/agent/scout/x |
+| `scout.x.result` | Get X scout results by run ID | GET /api/agent/scout/x/[id] |
+| `scout.reddit` | Run Reddit scout analysis | POST /api/agent/scout/reddit |
+| `scout.reddit.result` | Get Reddit scout results by run ID | GET /api/agent/scout/reddit/[id] |
+
+## Intelligence & Research
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `gaps.generate` | Generate SEO/GEO content gap opportunities | POST /api/agent/gaps/generate |
+| `gaps.list` | List saved content gaps | GET /api/agent/gaps |
+| `competitors.discover` | Discover competitors by keyword set | POST /api/agent/competitors/discover |
+| `competitors.scout` | Analyze a competitor domain | POST /api/agent/competitors/scout |
+
+## Content Ingestion
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `ingest.create` | Create ingestion job from URL | POST /api/agent/ingest |
+| `ingest.get` | Get ingestion job status/result | GET /api/agent/ingest/[id] |
+| `ingest.content.get` | Fetch extracted content payload | GET /api/agent/ingest/[id]/content |
+| `ingest.batch` | Batch ingestion for multiple URLs | POST /api/agent/ingest/batch |
+
+## Autopilot Sessions
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `session.create` | Create and start an autopilot session | POST /api/agent/session |
+
+## Publishing & Scheduling
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `social.publish` | Publish, schedule, or cancel social publishing | POST /api/agent/publish |
+| `schedule.list` | List upcoming schedule timeline | GET /api/agent/schedule |
+| `schedule.gaps` | List schedule gaps for upcoming days | GET /api/agent/schedule/gaps |
+
+## Video (Shorts)
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `shorts.generate` | Generate shorts video (async, returns poll hint) | POST /api/agent/shorts |
+| `shorts.get` | Get shorts generation status/result | GET /api/agent/shorts/[id] |
+
+## Product Knowledge
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `products.create` | Upload product knowledge document | POST /api/agent/products |
+| `products.list` | List product knowledge documents | GET /api/agent/products |
+| `products.delete` | Delete product knowledge document | DELETE /api/agent/products/[id] |
+| `products.search` | Search product knowledge documents | POST /api/agent/products/search |
+
+## Account & Settings
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `agent.me` | Return agent profile, balances and limits | GET /api/agent/me |
+| `agent.health` | Infrastructure health checks | GET /api/agent/health |
+| `agent.status` | Actionable operational status snapshot | GET /api/agent/status |
+| `settings.get` | Get current agent settings | GET /api/agent/settings |
+| `personas.list` | List available writing personas | GET /api/agent/personas |
+
+## Webhooks
+
+| Tool | Description | API Endpoint |
+|---|---|---|
+| `webhooks.register` | Register webhook endpoint | POST /api/agent/webhooks |
+| `webhooks.list` | List webhook endpoints | GET /api/agent/webhooks |
+| `webhooks.deliveries` | List webhook delivery attempts | GET /api/agent/webhooks/deliveries |
+| `webhooks.delete` | Delete webhook endpoint | DELETE /api/agent/webhooks/[id] |
+
+## Async Operations
+
+Some tools return `"status": "processing"` with polling instructions:
+
+- `shorts.generate` → poll with `shorts.get`
+- `leadmagnet.generate` → poll with `leadmagnet.get`
+- `scout.x` → poll with `scout.x.result`
+- `scout.reddit` → poll with `scout.reddit.result`
+- `ingest.create` → poll with `ingest.get`
