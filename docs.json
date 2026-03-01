@@ -8,8 +8,8 @@
     "dark": "#15803D"
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/citedy.webp",
+    "dark": "/logo/citedy.webp"
   },
   "favicon": "/favicon.svg",
   "topbarLinks": [
@@ -66,9 +66,153 @@
         "tab": "API Reference",
         "groups": [
           {
-            "group": "API Reference",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Account & Auth",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "registerAgentPending",
+                  "getAgentContext",
+                  "getAgentPlatformHealth",
+                  "getAgentStatus",
+                  "rotateAgentKey",
+                  "getAgentSettings",
+                  "updateAgentSettings",
+                  "updateImageStyle",
+                  "listPersonas"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Content Creation",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "createMicroPost",
+                  "generateAutopilotArticle",
+                  "listAgentArticles",
+                  "generateSocialAdaptations",
+                  "createAutopilotSession"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Publishing & Scheduling",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "publishSocialAdaptation",
+                  "getScheduleTimeline",
+                  "getScheduleGaps",
+                  "suggestTimeSlots"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Trend Scanning",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "scanTrends",
+                  "runXScout",
+                  "getXScoutResult",
+                  "runRedditScout",
+                  "getRedditScoutResult"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Intelligence",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "listContentGaps",
+                  "generateContentGaps",
+                  "discoverCompetitors",
+                  "scoutCompetitor"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Knowledge Base",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "createProductDocument",
+                  "listProductDocuments",
+                  "deleteProductDocument",
+                  "searchProductKnowledge"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Content Ingestion",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "createIngestJob",
+                  "getIngestJob",
+                  "getIngestJobContent",
+                  "createIngestBatch"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Video (Shorts)",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "generateShortsVideo",
+                  "getShortsVideoStatus"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Lead Magnets",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "createLeadMagnet",
+                  "getLeadMagnet",
+                  "updateLeadMagnetStatus"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              {
+                "source": "api-reference/openapi.json",
+                "operationIds": [
+                  "registerWebhookEndpoint",
+                  "listWebhookEndpoints",
+                  "listWebhookDeliveries",
+                  "deleteWebhookEndpoint"
+                ]
+              }
             ]
           }
         ]
