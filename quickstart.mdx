@@ -1,39 +1,50 @@
 ---
 title: Quick Start
-description: From signup to first published post in 5 minutes
+description: From zero to published in 5 minutes
 ---
 
-## 1. Create Account & Get API Key
+## 1. Register Your Agent
 
-1. Sign up at [citedy.com](https://www.citedy.com)
-2. Go to [Dashboard → Settings → Agent](https://www.citedy.com/dashboard/settings?section=team&agent=connect)
-3. Connect an agent and copy your API key (`citedy_agent_...`)
+Call the public registration endpoint (no auth required):
+
+```bash
+curl -X POST https://www.citedy.com/api/agent/register \
+  -H "Content-Type: application/json" \
+  -d '{"agent_name": "my-agent"}'
+```
+
+Response:
+
+```json
+{
+  "pending_id": "...",
+  "approval_url": "https://www.citedy.com/approve-agent/...",
+  "expires_in": 3600
+}
+```
+
+## 2. Approve & Get API Key
+
+Open `approval_url` in your browser. You'll need a [Citedy account](https://www.citedy.com/register) — create one if you don't have it yet.
+
+After approving, the page shows your API key (starts with `citedy_agent_`). Copy it.
 
 New accounts receive **100 free credits** — no card required.
 
-## 2. Check Operational Status
+## 3. Check Operational Status
 
 ```bash
 curl https://www.citedy.com/api/agent/status \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer citedy_agent_YOUR_KEY"
 ```
 
-Returns credit balance, connected social accounts, schedule gaps, and recommended next actions.
-
-## 3. Upload Product Knowledge (optional, 1 credit)
-
-```bash
-curl -X POST https://www.citedy.com/api/agent/products \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://docs.yourproduct.com"}'
-```
+Returns credit balance, connected social accounts, schedule gaps, and next actions.
 
 ## 4. Write Your First Article (~20 credits)
 
 ```bash
 curl -X POST https://www.citedy.com/api/agent/autopilot \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer citedy_agent_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"topic": "AI agents changing how we code", "size": "standard"}'
 ```
@@ -42,7 +53,7 @@ curl -X POST https://www.citedy.com/api/agent/autopilot \
 
 ```bash
 curl -X POST https://www.citedy.com/api/agent/adapt \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer citedy_agent_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"article_id": "ARTICLE_ID_FROM_STEP_4", "platforms": ["linkedin", "x_article"]}'
 ```
@@ -51,16 +62,16 @@ curl -X POST https://www.citedy.com/api/agent/adapt \
 
 ```bash
 curl -X POST https://www.citedy.com/api/agent/publish \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer citedy_agent_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"adaptationId": "ADAPTATION_ID", "action": "now", "platform": "linkedin"}'
 ```
 
-Total cost: ~32 credits = **$0.32** for an SEO article published with social posts.
+Total cost: ~32 credits = **$0.32** for an SEO article with social posts.
 
 ## Next Steps
 
 - [Connect social accounts](https://www.citedy.com/dashboard/settings?section=account&tab=integrations) for auto-publishing
-- [Explore MCP integration](/mcp/overview) for Claude Code / Cursor
+- [MCP integration](/mcp/overview) for Claude Code / Cursor
 - [Credit pricing](/billing/credits) and operation costs
 - [Full API reference](/api-reference/introduction)
