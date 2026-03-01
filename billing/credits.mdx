@@ -106,13 +106,6 @@ Top-up: [citedy.com/dashboard/billing](https://www.citedy.com/dashboard/billing)
 | Voice-over full | 35 cr |
 | Voice-over pillar | 55 cr |
 
-## Pre-Charge Pattern
+## Insufficient Balance
 
-All paid operations use a pre-charge → refund pattern:
-
-1. Check balance >= required cost
-2. Charge credits atomically (TOCTOU-safe)
-3. Execute operation
-4. On failure: automatic refund via `safeRefund()`
-
-If your balance is insufficient, you'll receive a `402` response with a top-up link.
+If your balance is insufficient for an operation, you'll receive a `402` response with a link to top up credits. Failed operations are automatically refunded.
