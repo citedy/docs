@@ -73,110 +73,151 @@
             ]
           },
           {
-            "group": "Account & Auth",
+            "group": "Health",
             "pages": [
-              "POST /api/agent/register",
-              "POST /api/agent/approve",
-              "GET /api/agent/me",
-              "GET /api/agent/health",
-              "GET /api/agent/status",
-              "POST /api/agent/rotate-key",
-              "GET /api/agent/settings",
-              "PUT /api/agent/settings",
-              "PUT /api/agent/image-style",
-              "GET /api/agent/personas"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/health/health-check"
+            ]
+          },
+          {
+            "group": "Registration",
+            "pages": [
+              "api-reference/registration/create-pending-agent-registration",
+              "api-reference/registration/check-pending-registration-status",
+              "api-reference/registration/approve-pending-registration"
+            ]
+          },
+          {
+            "group": "Agent Info",
+            "pages": [
+              "api-reference/agent/get-agent-info-balance-and-limits",
+              "api-reference/agent/rotate-current-agent-api-key"
+            ]
+          },
+          {
+            "group": "Status",
+            "pages": [
+              "api-reference/status/get-operational-agent-status"
+            ]
+          },
+          {
+            "group": "Settings",
+            "pages": [
+              "api-reference/settings/get-agent-preferences-and-configuration",
+              "api-reference/settings/update-agent-preferences-partial-update",
+              "api-reference/settings/set-illustration-style-preset"
+            ]
+          },
+          {
+            "group": "Personas",
+            "pages": [
+              "api-reference/personas/list-available-personas"
+            ]
           },
           {
             "group": "Content Creation",
             "pages": [
-              "POST /api/agent/post",
-              "POST /api/agent/autopilot",
-              "GET /api/agent/articles",
-              "POST /api/agent/adapt",
-              "POST /api/agent/session"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/autopilot/create-micro-content-post-with-social-adaptations",
+              "api-reference/autopilot/generate-article",
+              "api-reference/autopilot/list-articles"
+            ]
           },
           {
-            "group": "Publishing & Scheduling",
+            "group": "Social Adaptations",
             "pages": [
-              "POST /api/agent/publish",
-              "GET /api/agent/schedule",
-              "GET /api/agent/schedule/gaps",
-              "GET /api/agent/schedule/suggest"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/adaptations/generate-social-adaptations"
+            ]
+          },
+          {
+            "group": "Autopilot Sessions",
+            "pages": [
+              "api-reference/sessions/create-and-start-autopilot-session"
+            ]
+          },
+          {
+            "group": "Publishing",
+            "pages": [
+              "api-reference/publishing/publish-schedule-or-cancel-a-social-adaptation"
+            ]
+          },
+          {
+            "group": "Scheduling",
+            "pages": [
+              "api-reference/schedule/get-scheduled-content-timeline",
+              "api-reference/schedule/identify-days-with-fewer-posts-than-target",
+              "api-reference/schedule/get-recommended-posting-time-slots"
+            ]
           },
           {
             "group": "Trend Scanning",
             "pages": [
-              "POST /api/agent/scan",
-              "POST /api/agent/scout/x",
-              "GET /api/agent/scout/x/{runId}",
-              "POST /api/agent/scout/reddit",
-              "GET /api/agent/scout/reddit/{runId}"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/scan/scan-trends-via-xai-grok-experimental"
+            ]
           },
           {
-            "group": "Intelligence",
+            "group": "Scout",
             "pages": [
-              "GET /api/agent/gaps",
-              "POST /api/agent/gaps/generate",
-              "POST /api/agent/competitors/discover",
-              "POST /api/agent/competitors/scout"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/scout/run-xtwitter-scout",
+              "api-reference/scout/poll-x-scout-result",
+              "api-reference/scout/run-reddit-scout",
+              "api-reference/scout/poll-reddit-scout-result"
+            ]
+          },
+          {
+            "group": "Content Gaps",
+            "pages": [
+              "api-reference/gaps/list-content-gaps",
+              "api-reference/gaps/generate-content-gaps"
+            ]
+          },
+          {
+            "group": "Competitors",
+            "pages": [
+              "api-reference/competitors/discover-competitors-by-keywords",
+              "api-reference/competitors/analyze-a-competitor-domain"
+            ]
           },
           {
             "group": "Knowledge Base",
             "pages": [
-              "POST /api/agent/products",
-              "GET /api/agent/products",
-              "DELETE /api/agent/products/{id}",
-              "POST /api/agent/products/search"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/products/upload-product-knowledge-document",
+              "api-reference/products/list-product-knowledge-documents",
+              "api-reference/products/delete-product-knowledge-document-by-id",
+              "api-reference/products/search-product-knowledge-documents"
+            ]
           },
           {
             "group": "Content Ingestion",
             "pages": [
-              "POST /api/agent/ingest",
-              "GET /api/agent/ingest",
-              "GET /api/agent/ingest/{id}",
-              "GET /api/agent/ingest/{id}/content",
-              "POST /api/agent/ingest/batch"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/ingest/create-ingestion-job",
+              "api-reference/ingest/list-ingestion-jobs",
+              "api-reference/ingest/poll-ingestion-job-status",
+              "api-reference/ingest/download-raw-ingested-content",
+              "api-reference/ingest/batch-create-ingestion-jobs"
+            ]
           },
           {
             "group": "Video (Shorts)",
             "pages": [
-              "POST /api/agent/shorts",
-              "GET /api/agent/shorts/{id}"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/shorts/generate-short-form-video",
+              "api-reference/shorts/get-shorts-generation-status-by-id"
+            ]
           },
           {
             "group": "Lead Magnets",
             "pages": [
-              "POST /api/agent/lead-magnets",
-              "GET /api/agent/lead-magnets/{id}",
-              "PATCH /api/agent/lead-magnets/{id}"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/lead-magnets/generate-lead-magnet",
+              "api-reference/lead-magnets/get-lead-magnet-statusdetails",
+              "api-reference/lead-magnets/publish-or-archive-lead-magnet"
+            ]
           },
           {
             "group": "Webhooks",
             "pages": [
-              "POST /api/agent/webhooks",
-              "GET /api/agent/webhooks",
-              "GET /api/agent/webhooks/deliveries",
-              "DELETE /api/agent/webhooks/{id}"
-            ],
-            "openapi": "api-reference/openapi.json"
+              "api-reference/webhooks/register-webhook-endpoint",
+              "api-reference/webhooks/list-webhook-endpoints",
+              "api-reference/webhooks/list-webhook-delivery-history",
+              "api-reference/webhooks/delete-webhook-endpoint"
+            ]
           }
         ]
       }
