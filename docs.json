@@ -75,145 +75,97 @@
           {
             "group": "Account & Auth",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "registerAgentPending",
-                  "getAgentContext",
-                  "getAgentPlatformHealth",
-                  "getAgentStatus",
-                  "rotateAgentKey",
-                  "getAgentSettings",
-                  "updateAgentSettings",
-                  "updateImageStyle",
-                  "listPersonas"
-                ]
-              }
+              "POST /api/agent/register",
+              "POST /api/agent/approve",
+              "GET /api/agent/me",
+              "GET /api/agent/health",
+              "GET /api/agent/status",
+              "POST /api/agent/rotate-key",
+              "GET /api/agent/settings",
+              "PUT /api/agent/settings",
+              "PUT /api/agent/image-style",
+              "GET /api/agent/personas"
             ]
           },
           {
             "group": "Content Creation",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "createMicroPost",
-                  "generateAutopilotArticle",
-                  "listAgentArticles",
-                  "generateSocialAdaptations",
-                  "createAutopilotSession"
-                ]
-              }
+              "POST /api/agent/post",
+              "POST /api/agent/autopilot",
+              "GET /api/agent/articles",
+              "POST /api/agent/adapt",
+              "POST /api/agent/session"
             ]
           },
           {
             "group": "Publishing & Scheduling",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "publishSocialAdaptation",
-                  "getScheduleTimeline",
-                  "getScheduleGaps",
-                  "suggestTimeSlots"
-                ]
-              }
+              "POST /api/agent/publish",
+              "GET /api/agent/schedule",
+              "GET /api/agent/schedule/gaps",
+              "GET /api/agent/schedule/suggest"
             ]
           },
           {
             "group": "Trend Scanning",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "scanTrends",
-                  "runXScout",
-                  "getXScoutResult",
-                  "runRedditScout",
-                  "getRedditScoutResult"
-                ]
-              }
+              "POST /api/agent/scan",
+              "POST /api/agent/scout/x",
+              "GET /api/agent/scout/x/{runId}",
+              "POST /api/agent/scout/reddit",
+              "GET /api/agent/scout/reddit/{runId}"
             ]
           },
           {
             "group": "Intelligence",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "listContentGaps",
-                  "generateContentGaps",
-                  "discoverCompetitors",
-                  "scoutCompetitor"
-                ]
-              }
+              "GET /api/agent/gaps",
+              "POST /api/agent/gaps/generate",
+              "POST /api/agent/competitors/discover",
+              "POST /api/agent/competitors/scout"
             ]
           },
           {
             "group": "Knowledge Base",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "createProductDocument",
-                  "listProductDocuments",
-                  "deleteProductDocument",
-                  "searchProductKnowledge"
-                ]
-              }
+              "POST /api/agent/products",
+              "GET /api/agent/products",
+              "DELETE /api/agent/products/{id}",
+              "POST /api/agent/products/search"
             ]
           },
           {
             "group": "Content Ingestion",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "createIngestJob",
-                  "getIngestJob",
-                  "getIngestJobContent",
-                  "createIngestBatch"
-                ]
-              }
+              "POST /api/agent/ingest",
+              "GET /api/agent/ingest",
+              "GET /api/agent/ingest/{id}",
+              "GET /api/agent/ingest/{id}/content",
+              "POST /api/agent/ingest/batch"
             ]
           },
           {
             "group": "Video (Shorts)",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "generateShortsVideo",
-                  "getShortsVideoStatus"
-                ]
-              }
+              "POST /api/agent/shorts",
+              "GET /api/agent/shorts/{id}"
             ]
           },
           {
             "group": "Lead Magnets",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "createLeadMagnet",
-                  "getLeadMagnet",
-                  "updateLeadMagnetStatus"
-                ]
-              }
+              "POST /api/agent/lead-magnets",
+              "GET /api/agent/lead-magnets/{id}",
+              "PATCH /api/agent/lead-magnets/{id}"
             ]
           },
           {
             "group": "Webhooks",
             "pages": [
-              {
-                "source": "api-reference/openapi.json",
-                "operationIds": [
-                  "registerWebhookEndpoint",
-                  "listWebhookEndpoints",
-                  "listWebhookDeliveries",
-                  "deleteWebhookEndpoint"
-                ]
-              }
+              "POST /api/agent/webhooks",
+              "GET /api/agent/webhooks",
+              "GET /api/agent/webhooks/deliveries",
+              "DELETE /api/agent/webhooks/{id}"
             ]
           }
         ]
