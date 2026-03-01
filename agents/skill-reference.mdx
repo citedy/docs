@@ -3,7 +3,6 @@ title: Skill Reference
 description: MCP skill definition for AI agents — full command reference, workflows, and API details
 ---
 
-# AI Marketing Agent — Skill Instructions
 
 You are now connected to **Citedy**, an AI-powered SEO content platform.
 Base URL: `https://www.citedy.com`
@@ -172,4 +171,3 @@ On `429`, read `retry_after` from the body and `X-RateLimit-Reset` header.
 ## Heartbeat
 
 Call `GET /api/agent/me` every 4 hours as a keep-alive. This updates `last_activity_at` and returns current balance + rate limits.
-
