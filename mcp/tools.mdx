@@ -1,11 +1,11 @@
 ---
 title: MCP Tools Reference
-description: Complete list of 38 MCP tools available via the Citedy MCP server
+description: Complete list of 52 MCP tools available via the Citedy MCP server
 ---
 
 # MCP Tools Reference
 
-The Citedy MCP server exposes **38 tools**. Each tool maps to an Agent API endpoint.
+The Citedy MCP server exposes **52 tools**. Each tool maps to an Agent API endpoint.
 
 Endpoint: `https://mcp.citedy.com/mcp`
 
@@ -29,6 +29,13 @@ Endpoint: `https://mcp.citedy.com/mcp`
 |---|---|---|
 | `article.generate` | Generate a new article using the autopilot flow and current workspace settings. | `POST /api/agent/autopilot` |
 | `article.list` | List previously generated articles for the current workspace. | `GET /api/agent/articles` |
+
+## brand
+
+| Tool | Description | Endpoint |
+|---|---|---|
+| `brand.scan` | Run AI brand visibility scan across major LLM providers (async, poll with brand.scan.get). | `POST /api/agent/tools/brand-scan` |
+| `brand.scan.get` | Get brand scan status and final result payload by scan ID. | `GET /api/agent/tools/brand-scan/{id}` |
 
 ## Competitor Analysis
 
@@ -93,6 +100,20 @@ Endpoint: `https://mcp.citedy.com/mcp`
 | `scout.x` | Run X/Twitter scout analysis. Returns processing status — poll scout.x.result for results. | `POST /api/agent/scout/x` |
 | `scout.x.result` | Get X scout run status and results by run ID. | `GET /api/agent/scout/x/{runId}` |
 
+## seo
+
+| Tool | Description | Endpoint |
+|---|---|---|
+| `seo.headings.check` | Analyze heading hierarchy (H1-H6) for a page. | `POST /api/agent/tools/headings` |
+| `seo.internal_links.plan` | Plan internal linking opportunities from source URL and target URLs/sitemap. | `POST /api/agent/tools/internal-links` |
+| `seo.links.analyze` | Analyze internal/external links and link attributes. | `POST /api/agent/tools/links` |
+| `seo.meta_tags.check` | Analyze meta tags for a target page URL. | `POST /api/agent/tools/meta-tags` |
+| `seo.og_image.generate` | Generate an Open Graph image artifact and return hosted URL for brand assets. | `POST /api/agent/tools/og-image` |
+| `seo.og.preview` | Extract Open Graph and Twitter card preview metadata. | `POST /api/agent/tools/og-preview` |
+| `seo.robots.check` | Check robots.txt availability and parsed directives. | `POST /api/agent/tools/robots` |
+| `seo.schema.validate` | Validate JSON-LD schema markup for a page. | `POST /api/agent/tools/schema-validate` |
+| `seo.sitemap.check` | Check sitemap availability and robots sitemap hints. | `POST /api/agent/tools/sitemap` |
+
 ## Autopilot Sessions
 
 | Tool | Description | Endpoint |
@@ -109,8 +130,11 @@ Endpoint: `https://mcp.citedy.com/mcp`
 
 | Tool | Description | Endpoint |
 |---|---|---|
+| `shorts.avatar` | Generate an AI avatar image for shorts and return hosted avatar URL. | `POST /api/agent/shorts/avatar` |
 | `shorts.generate` | Generate shorts video and return poll instructions until final video URL is ready. | `POST /api/agent/shorts` |
 | `shorts.get` | Get shorts generation status/result by ID. | `GET /api/agent/shorts/{id}` |
+| `shorts.merge` | Merge 2-4 short clips, apply subtitle phrases, and return final video URL. | `POST /api/agent/shorts/merge` |
+| `shorts.script` | Generate short-form video script text (hook/educational/cta styles). | `POST /api/agent/shorts/script` |
 
 ## Publishing
 
@@ -131,6 +155,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 
 These tools may return `"status": "processing"` and polling instructions:
 
+- `brand.scan` -> poll with `brand.scan.get` using `id`
 - `ingest.batch` -> poll with `ingest.get` using `id`
 - `ingest.create` -> poll with `ingest.get` using `id`
 - `leadmagnet.generate` -> poll with `leadmagnet.get` using `id`

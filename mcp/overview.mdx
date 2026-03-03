@@ -3,12 +3,9 @@ title: MCP Integration
 description: Connect to Citedy via Model Context Protocol
 ---
 
-
-Citedy exposes a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that lets any MCP-compatible AI client use Citedy tools natively.
+Citedy exposes a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that lets MCP-compatible AI clients use Citedy tools natively.
 
 ## Connecting
-
-### Claude Desktop / Claude Code
 
 Add to your MCP config (`~/.claude/claude_desktop_config.json` or project `.mcp.json`):
 
@@ -16,7 +13,7 @@ Add to your MCP config (`~/.claude/claude_desktop_config.json` or project `.mcp.
 {
   "mcpServers": {
     "citedy": {
-      "url": "https://www.citedy.com/mcp",
+      "url": "https://mcp.citedy.com/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_API_KEY"
       }
@@ -25,52 +22,19 @@ Add to your MCP config (`~/.claude/claude_desktop_config.json` or project `.mcp.
 }
 ```
 
-### Cursor / Other MCP Clients
+## Connection Details
 
-Use the Streamable HTTP transport:
-
-- **URL**: `https://www.citedy.com/mcp`
-- **Auth**: `Authorization: Bearer YOUR_API_KEY`
-
-## How It Works
-
-The MCP server wraps the Agent API. Each MCP tool maps to one or more API endpoints. The server handles:
-
-- Authentication via your API key
-- Input validation and type checking
-- Structured response envelopes with status, operation hints, and error details
-- Automatic polling hints for async operations (video generation, ingestion, scouts)
+- URL: `https://mcp.citedy.com/mcp`
+- Auth: `Authorization: Bearer citedy_agent_...`
+- Transport: Streamable HTTP MCP
 
 ## Response Envelope
 
-Every tool returns a structured envelope:
-
-```json
-{
-  "tool": "article.generate",
-  "status": "completed",
-  "result": { ... },
-  "meta": {
-    "request_id": "uuid",
-    "endpoint": "POST /api/agent/autopilot",
-    "http_status": 200
-  }
-}
-```
-
-For async operations, the envelope includes polling instructions:
-
-```json
-{
-  "status": "processing",
-  "operation": {
-    "id": "uuid",
-    "poll_tool": "shorts.get",
-    "poll_input": { "id": "uuid" }
-  }
-}
-```
+Every tool returns a structured envelope with status and metadata. Async tools include polling instructions (`operation.poll_tool`).
 
 ## Available Tools
 
-See the [full MCP tools reference](/mcp/tools) for all 38 tools with descriptions and input schemas.
+See the [full MCP tools reference](/mcp/tools) for all **52 tools** with endpoints and descriptions.
+
+Need prebuilt install recipes? See [Skills overview](/skills/overview).
+

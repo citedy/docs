@@ -56,6 +56,18 @@
             ]
           },
           {
+            "group": "Skills",
+            "pages": [
+              "skills/overview",
+              "skills/content-writer",
+              "skills/trend-scout",
+              "skills/content-ingestion",
+              "skills/lead-magnets",
+              "skills/video-shorts",
+              "skills/full-suite"
+            ]
+          },
+          {
             "group": "Agent Guide",
             "pages": [
               "agents/skill-reference"
@@ -81,9 +93,9 @@
           {
             "group": "Registration",
             "pages": [
-              "api-reference/registration/create-pending-agent-registration",
+              "api-reference/registration/approve-pending-registration",
               "api-reference/registration/check-pending-registration-status",
-              "api-reference/registration/approve-pending-registration"
+              "api-reference/registration/create-pending-agent-registration"
             ]
           },
           {
@@ -103,8 +115,8 @@
             "group": "Settings",
             "pages": [
               "api-reference/settings/get-agent-preferences-and-configuration",
-              "api-reference/settings/update-agent-preferences-partial-update",
-              "api-reference/settings/set-illustration-style-preset"
+              "api-reference/settings/set-illustration-style-preset",
+              "api-reference/settings/update-agent-preferences-partial-update"
             ]
           },
           {
@@ -142,9 +154,9 @@
           {
             "group": "Scheduling",
             "pages": [
+              "api-reference/schedule/get-recommended-posting-time-slots",
               "api-reference/schedule/get-scheduled-content-timeline",
-              "api-reference/schedule/identify-days-with-fewer-posts-than-target",
-              "api-reference/schedule/get-recommended-posting-time-slots"
+              "api-reference/schedule/identify-days-with-fewer-posts-than-target"
             ]
           },
           {
@@ -156,50 +168,53 @@
           {
             "group": "Scout",
             "pages": [
-              "api-reference/scout/run-xtwitter-scout",
+              "api-reference/scout/poll-reddit-scout-result",
               "api-reference/scout/poll-x-scout-result",
               "api-reference/scout/run-reddit-scout",
-              "api-reference/scout/poll-reddit-scout-result"
+              "api-reference/scout/run-xtwitter-scout"
             ]
           },
           {
             "group": "Content Gaps",
             "pages": [
-              "api-reference/gaps/list-content-gaps",
-              "api-reference/gaps/generate-content-gaps"
+              "api-reference/gaps/generate-content-gaps",
+              "api-reference/gaps/list-content-gaps"
             ]
           },
           {
             "group": "Competitors",
             "pages": [
-              "api-reference/competitors/discover-competitors-by-keywords",
-              "api-reference/competitors/analyze-a-competitor-domain"
+              "api-reference/competitors/analyze-a-competitor-domain",
+              "api-reference/competitors/discover-competitors-by-keywords"
             ]
           },
           {
             "group": "Knowledge Base",
             "pages": [
-              "api-reference/products/upload-product-knowledge-document",
-              "api-reference/products/list-product-knowledge-documents",
               "api-reference/products/delete-product-knowledge-document-by-id",
-              "api-reference/products/search-product-knowledge-documents"
+              "api-reference/products/list-product-knowledge-documents",
+              "api-reference/products/search-product-knowledge-documents",
+              "api-reference/products/upload-product-knowledge-document"
             ]
           },
           {
             "group": "Content Ingestion",
             "pages": [
+              "api-reference/ingest/batch-create-ingestion-jobs",
               "api-reference/ingest/create-ingestion-job",
-              "api-reference/ingest/list-ingestion-jobs",
-              "api-reference/ingest/poll-ingestion-job-status",
               "api-reference/ingest/download-raw-ingested-content",
-              "api-reference/ingest/batch-create-ingestion-jobs"
+              "api-reference/ingest/list-ingestion-jobs",
+              "api-reference/ingest/poll-ingestion-job-status"
             ]
           },
           {
             "group": "Video (Shorts)",
             "pages": [
               "api-reference/shorts/generate-short-form-video",
-              "api-reference/shorts/get-shorts-generation-status-by-id"
+              "api-reference/shorts/generate-shorts-avatar",
+              "api-reference/shorts/generate-shorts-script",
+              "api-reference/shorts/get-shorts-generation-status-by-id",
+              "api-reference/shorts/merge-shorts-videos-and-add-subtitles"
             ]
           },
           {
@@ -213,10 +228,26 @@
           {
             "group": "Webhooks",
             "pages": [
-              "api-reference/webhooks/register-webhook-endpoint",
-              "api-reference/webhooks/list-webhook-endpoints",
+              "api-reference/webhooks/delete-webhook-endpoint",
               "api-reference/webhooks/list-webhook-delivery-history",
-              "api-reference/webhooks/delete-webhook-endpoint"
+              "api-reference/webhooks/list-webhook-endpoints",
+              "api-reference/webhooks/register-webhook-endpoint"
+            ]
+          },
+          {
+            "group": "SEO Tools",
+            "pages": [
+              "api-reference/seo-tools/analyze-heading-hierarchy",
+              "api-reference/seo-tools/analyze-page-links",
+              "api-reference/seo-tools/analyze-page-meta-tags",
+              "api-reference/seo-tools/analyze-robotstxt-directives",
+              "api-reference/seo-tools/check-sitemap-availability-and-robotstxt-hints",
+              "api-reference/seo-tools/extract-open-graphtwitter-preview-metadata",
+              "api-reference/seo-tools/generate-branded-open-graph-image",
+              "api-reference/seo-tools/get-async-brand-scan-statusresult",
+              "api-reference/seo-tools/plan-internal-links-from-page-+-targets",
+              "api-reference/seo-tools/start-async-ai-brand-visibility-scan",
+              "api-reference/seo-tools/validate-page-json-ld-schema-markup"
             ]
           }
         ]

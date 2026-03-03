@@ -98,6 +98,10 @@
     {
       "name": "Shorts",
       "description": "Short-form video generation and polling"
+    },
+    {
+      "name": "SEO Tools",
+      "description": "Agent-authenticated SEO diagnostics tools exposed via MCP seo.* namespace."
     }
   ],
   "paths": {
@@ -2409,6 +2413,1111 @@
           }
         }
       }
+    },
+    "/api/agent/shorts/script": {
+      "post": {
+        "tags": ["Shorts"],
+        "operationId": "generateShortsScript",
+        "summary": "Generate shorts script",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortsScriptRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Script generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsScriptResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/shorts/avatar": {
+      "post": {
+        "tags": ["Shorts"],
+        "operationId": "generateShortsAvatar",
+        "summary": "Generate shorts avatar",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortsAvatarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsAvatarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/shorts/merge": {
+      "post": {
+        "tags": ["Shorts"],
+        "operationId": "mergeShortsVideo",
+        "summary": "Merge shorts videos and add subtitles",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortsMergeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Merge completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsMergeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/tools/meta-tags": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Analyze page meta tags",
+        "operationId": "seoMetaTagsCheck",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/headings": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Analyze heading hierarchy",
+        "operationId": "seoHeadingsCheck",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/links": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Analyze page links",
+        "operationId": "seoLinksAnalyze",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/internal-links": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Plan internal links from page + targets",
+        "operationId": "seoInternalLinksPlan",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoInternalLinksRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/og-preview": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Extract Open Graph/Twitter preview metadata",
+        "operationId": "seoOgPreview",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/schema-validate": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Validate page JSON-LD schema markup",
+        "operationId": "seoSchemaValidate",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/robots": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Analyze robots.txt directives",
+        "operationId": "seoRobotsCheck",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/sitemap": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Check sitemap availability and robots.txt hints",
+        "operationId": "seoSitemapCheck",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoToolUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/og-image": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Generate branded Open Graph image",
+        "operationId": "seoOgImageGenerate",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeoOgImageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeoToolSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Missing logo or settings conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Logo payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/brand-scan": {
+      "post": {
+        "tags": ["SEO Tools"],
+        "summary": "Start async AI brand visibility scan",
+        "operationId": "brandScanStart",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandScanStartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scan accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandScanStartResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequiredResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another scan is in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent/tools/brand-scan/{id}": {
+      "get": {
+        "tags": ["SEO Tools"],
+        "summary": "Get async brand scan status/result",
+        "operationId": "brandScanGet",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scan status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandScanStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4397,7 +5506,9 @@
               "x_thread",
               "reddit",
               "threads",
-              "instagram"
+              "instagram",
+              "instagram_reels",
+              "youtube_shorts"
             ]
           },
           "accountId": {
@@ -5300,6 +6411,11 @@
         "type": "object",
         "required": ["prompt", "avatar_url", "duration"],
         "properties": {
+          "article_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional article ID. When provided, shorts_video_url is saved to article metadata on completion."
+          },
           "prompt": {
             "type": "string",
             "minLength": 10,
@@ -5398,6 +6514,480 @@
           },
           "subtitle_warning": {
             "type": ["string", "null"]
+          }
+        }
+      },
+      "ShortsScriptRequest": {
+        "type": "object",
+        "required": ["topic"],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "article_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional article ID. When provided, shorts_title, shorts_hashtags, and shorts_script are saved to article metadata."
+          },
+          "duration": {
+            "type": "string",
+            "enum": ["short", "long"],
+            "default": "short"
+          },
+          "style": {
+            "type": "string",
+            "enum": ["hook", "educational", "cta"],
+            "default": "hook"
+          },
+          "language": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 5,
+            "default": "en"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsScriptResponse": {
+        "type": "object",
+        "required": [
+          "script",
+          "title",
+          "hashtags",
+          "word_count",
+          "estimated_duration_sec",
+          "parts",
+          "credits_charged"
+        ],
+        "properties": {
+          "script": {
+            "type": "string",
+            "description": "Voiceover script text (also used as post description)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Catchy video title (max 100 chars), used as YouTube/TikTok title"
+          },
+          "hashtags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "description": "2-3 relevant hashtags with # prefix"
+          },
+          "word_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "estimated_duration_sec": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ShortsAvatarRequest": {
+        "type": "object",
+        "required": ["gender", "origin"],
+        "properties": {
+          "gender": {
+            "type": "string",
+            "enum": ["male", "female"]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "european",
+              "asian",
+              "african",
+              "latin",
+              "middle_eastern",
+              "south_asian"
+            ]
+          },
+          "age_range": {
+            "type": "string",
+            "enum": ["18-25", "26-35", "36-50"],
+            "default": "26-35"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["tech_founder", "vibe_coder", "student", "executive"],
+            "default": "tech_founder"
+          },
+          "location": {
+            "type": "string",
+            "enum": [
+              "coffee_shop",
+              "dev_cave",
+              "street",
+              "car",
+              "home_office",
+              "podcast_studio",
+              "glass_office",
+              "rooftop",
+              "bedroom",
+              "park",
+              "gym"
+            ],
+            "default": "coffee_shop"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsAvatarResponse": {
+        "type": "object",
+        "required": ["avatar_url", "r2_key", "credits_charged"],
+        "properties": {
+          "avatar_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "r2_key": {
+            "type": "string"
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "ShortsMergePhraseItem": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsMergeConfig": {
+        "type": "object",
+        "properties": {
+          "words_per_phrase": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 8
+          },
+          "font_size": {
+            "type": "integer",
+            "minimum": 16,
+            "maximum": 72
+          },
+          "position_from_bottom": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 300
+          },
+          "text_color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$|^[a-z]{3,20}$",
+            "description": "Hex color (#FFFFFF) or named color"
+          },
+          "stroke_color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$|^[a-z]{3,20}$",
+            "description": "Hex color (#FFFFFF) or named color"
+          },
+          "stroke_width": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsMergeRequest": {
+        "type": "object",
+        "required": ["video_urls", "phrases"],
+        "properties": {
+          "video_urls": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://download\\.citedy\\.com/"
+            },
+            "description": "2-4 video URLs hosted on download.citedy.com"
+          },
+          "phrases": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "$ref": "#/components/schemas/ShortsMergePhraseItem"
+            },
+            "description": "Must contain exactly one phrase per video URL"
+          },
+          "config": {
+            "$ref": "#/components/schemas/ShortsMergeConfig"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsMergeResponse": {
+        "type": "object",
+        "required": [
+          "video_url",
+          "r2_key",
+          "duration",
+          "segment_durations",
+          "credits_charged"
+        ],
+        "properties": {
+          "video_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "r2_key": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0
+          },
+          "segment_durations": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "SeoToolUrlRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000,
+            "description": "Target page URL."
+          }
+        }
+      },
+      "SeoInternalLinksRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000,
+            "description": "Source page URL to analyze."
+          },
+          "targetUrls": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "default": [],
+            "description": "Known target URLs for internal link opportunity analysis."
+          },
+          "sitemapUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000,
+            "description": "Optional sitemap URL used when targetUrls are not provided."
+          }
+        }
+      },
+      "SeoToolSuccessResponse": {
+        "type": "object",
+        "required": ["success", "tool", "data", "credits_charged"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "tool": {
+            "type": "string",
+            "example": "meta-tags"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Tool-specific diagnostics payload."
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 1
+          }
+        }
+      },
+      "SeoOgImageRequest": {
+        "type": "object",
+        "properties": {
+          "brandName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "brandDescription": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "primaryColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2000
+          },
+          "template": {
+            "type": "string",
+            "enum": ["product", "blog_post", "comparison", "case_study"]
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "subheadline": {
+            "type": "string",
+            "maxLength": 180
+          }
+        }
+      },
+      "BrandScanStartRequest": {
+        "type": "object",
+        "required": ["brandName"],
+        "properties": {
+          "brandName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "BrandScanProviderResult": {
+        "type": "object",
+        "required": ["llmId", "mentioned", "sentiment", "confidence"],
+        "properties": {
+          "llmId": {
+            "type": "string",
+            "enum": [
+              "chatgpt",
+              "gemini",
+              "perplexity",
+              "claude",
+              "deepseek",
+              "grok"
+            ]
+          },
+          "mentioned": {
+            "type": "boolean"
+          },
+          "sentiment": {
+            "type": "string",
+            "enum": ["positive", "neutral", "negative", "unknown"]
+          },
+          "snippet": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "BrandScanStartResponse": {
+        "type": "object",
+        "required": ["id", "status", "brand_name", "credits_charged"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing"]
+          },
+          "brand_name": {
+            "type": "string"
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "BrandScanStatusResponse": {
+        "type": "object",
+        "required": ["id", "status", "brand_name", "credits_charged"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing", "completed", "failed"]
+          },
+          "brand_name": {
+            "type": "string"
+          },
+          "credits_charged": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "overall_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandScanProviderResult"
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "error": {
+            "type": "string"
           }
         }
       }
