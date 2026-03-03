@@ -171,3 +171,12 @@ On `429`, read `retry_after` from the body and `X-RateLimit-Reset` header.
 | 500    | Server error            | Retry once after 5s, then report to user                        |
 
 ---
+
+## Heartbeat
+
+Call `GET /api/agent/me` every 4 hours as a keep-alive. This updates `last_activity_at` and returns current balance + rate limits.
+
+---
+
+_Citedy SEO Agent Skill v3.0.0_
+_https://www.citedy.com_
