@@ -35,8 +35,11 @@ Public MCP v1 intentionally exposes a smaller, outcome-first subset:
 - `POST /api/agent/products/search`
 - `POST /api/agent/shorts`
 - `GET /api/agent/shorts/[id]`
+- `POST /api/agent/shorts/script`
+- `POST /api/agent/shorts/avatar`
+- `POST /api/agent/shorts/merge`
 
-Not in public MCP v1 (still available in Agent API): `PUT /api/agent/settings`, `GET /api/agent/schedule/suggest`, `POST /api/agent/shorts/script`, `POST /api/agent/shorts/avatar`, `POST /api/agent/shorts/merge`.
+Not in public MCP v1 (still available in Agent API): `PUT /api/agent/settings`, `GET /api/agent/schedule/suggest`.
 
 ---
 
@@ -711,7 +714,7 @@ Cost: 1 credit
 ```
 
 API availability: yes.
-MCP v1 public exposure: no (internal pipeline step).
+MCP v1 public exposure: yes.
 
 Request:
 
@@ -759,7 +762,7 @@ Cost: 3 credits
 ```
 
 API availability: yes.
-MCP v1 public exposure: no (internal pipeline step).
+MCP v1 public exposure: yes.
 
 Request:
 
@@ -804,7 +807,7 @@ Cost: 5 credits
 ```
 
 API availability: yes.
-MCP v1 public exposure: no (internal pipeline step).
+MCP v1 public exposure: yes.
 
 Merges 2 or more video segments, trims silence, applies audio crossfade, renders subtitles.
 

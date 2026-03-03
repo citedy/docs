@@ -3,6 +3,8 @@ title: Platform Overview
 description: Citedy Agent Platform — architecture, authentication, and capabilities
 ---
 
+**Contract Snapshot**: 61 Agent API operations · 52 MCP tools
+
 **Version**: 1.7.0 | **Status**: Production | **Updated**: 2026-02-28
 
 Citedy is a backend service for AI agents. Connect once, configure defaults in the web UI, and let any agent — OpenClaw, Claude Code, Cursor, ChatGPT, or any MCP-compatible client — write posts, generate images, publish to social platforms, scan trends, and produce short-form video.
@@ -45,32 +47,29 @@ content.total_items: 0                     -> /post or /write
 
 ---
 
-
----
-
 ## Command Reference (Quick)
 
 | Agent Command      | API Call                           | Cost      |
 | ------------------ | ---------------------------------- | --------- |
-| `/post <topic>`    | POST /api/agent/post               | 2-4 credits    |
-| `/write <topic>`   | POST /api/agent/autopilot          | 4-8 credits    |
-| `/shorts <prompt>` | POST /api/agent/shorts             | 60-185 credits |
-| `/shorts script`   | POST /api/agent/shorts/script      | 1 credit      |
-| `/shorts avatar`   | POST /api/agent/shorts/avatar      | 3 credits      |
-| `/shorts merge`    | POST /api/agent/shorts/merge       | 5 credits      |
-| `/publish now`     | POST /api/agent/publish            | 0 credits      |
-| `/schedule list`   | GET /api/agent/schedule            | 0 credits      |
-| `/schedule gaps`   | GET /api/agent/schedule/gaps       | 0 credits      |
-| `/scan fast`       | POST /api/agent/scan (mode=fast)   | 2 credits      |
-| `/scan deep`       | POST /api/agent/scan (mode=deep)   | 4 credits      |
-| `/scan ultra`      | POST /api/agent/scan (mode=ultra)  | 6 credits      |
-| `/scan ultra+`     | POST /api/agent/scan (mode=ultra+) | 8 credits      |
-| `/products upload` | POST /api/agent/products           | 1 credit      |
-| `/products list`   | GET /api/agent/products            | 0 credits      |
-| `/products search` | POST /api/agent/products/search    | 0 credits      |
-| `/image-style`     | PUT /api/agent/image-style         | 0 credits      |
-| `/status`          | GET /api/agent/status              | 0 credits      |
-| `/settings`        | GET /api/agent/settings            | 0 credits      |
+| `/post <topic>`    | POST /api/agent/post               | 2-4 cr    |
+| `/write <topic>`   | POST /api/agent/autopilot          | 4-8 cr    |
+| `/shorts <prompt>` | POST /api/agent/shorts             | 60-185 cr |
+| `/shorts script`   | POST /api/agent/shorts/script      | 1 cr      |
+| `/shorts avatar`   | POST /api/agent/shorts/avatar      | 3 cr      |
+| `/shorts merge`    | POST /api/agent/shorts/merge       | 5 cr      |
+| `/publish now`     | POST /api/agent/publish            | 0 cr      |
+| `/schedule list`   | GET /api/agent/schedule            | 0 cr      |
+| `/schedule gaps`   | GET /api/agent/schedule/gaps       | 0 cr      |
+| `/scan fast`       | POST /api/agent/scan (mode=fast)   | 2 cr      |
+| `/scan deep`       | POST /api/agent/scan (mode=deep)   | 4 cr      |
+| `/scan ultra`      | POST /api/agent/scan (mode=ultra)  | 6 cr      |
+| `/scan ultra+`     | POST /api/agent/scan (mode=ultra+) | 8 cr      |
+| `/products upload` | POST /api/agent/products           | 1 cr      |
+| `/products list`   | GET /api/agent/products            | 0 cr      |
+| `/products search` | POST /api/agent/products/search    | 0 cr      |
+| `/image-style`     | PUT /api/agent/image-style         | 0 cr      |
+| `/status`          | GET /api/agent/status              | 0 cr      |
+| `/settings`        | GET /api/agent/settings            | 0 cr      |
 
 These commands describe the full Agent API surface.
 Public MCP v1 intentionally exposes a smaller tool set (see below).
@@ -94,12 +93,14 @@ MCP v1 is outcome-first. The goal is to expose stable high-value workflows, not 
 | `products.search`     | `POST /api/agent/products/search`    | Search knowledge chunks        |
 | `shorts.generate`     | `POST /api/agent/shorts`             | Returns processing + poll hint |
 | `shorts.get`          | `GET /api/agent/shorts/[id]`         | Poll final video status/url    |
+| `shorts.script`       | `POST /api/agent/shorts/script`      | Generate script text           |
+| `shorts.avatar`       | `POST /api/agent/shorts/avatar`      | Generate avatar image          |
+| `shorts.merge`        | `POST /api/agent/shorts/merge`       | Merge clips + subtitles        |
 
 Advanced/deferred for MCP public exposure:
 
 - `settings.update` (safe-field policy needed; web-first by default)
 - `schedule.suggest` (heuristic helper, not a critical contract)
-- `shorts.script`, `shorts.avatar`, `shorts.merge` (internal pipeline steps)
 
 ---
 
@@ -119,14 +120,22 @@ Key rotation: `POST /api/agent/rotate-key`
 
 ## Platform Support Matrix
 
-| Platform    | Text | Images | Video          |
-| ----------- | ---- | ------ | -------------- |
-| Twitter / X | Yes  | Yes    | Yes            |
-| LinkedIn    | Yes  | Yes    | Yes            |
-| Facebook    | Yes  | Yes    | Yes            |
-| Instagram   | Yes  | Yes    | Reels          |
-| YouTube     | -    | -      | Shorts         |
-| Reddit      | Yes  | Yes    | No (link only) |
-| Threads     | Yes  | Yes    | -              |
+| Platform    | Text | Images | Video          | Integration |
+| ----------- | ---- | ------ | -------------- | ----------- |
+| Twitter / X | Yes  | Yes    | Yes            | Direct API  |
+| LinkedIn    | Yes  | Yes    | Yes            | Direct API  |
+| Facebook    | Yes  | Yes    | Yes            | Direct API  |
+| Instagram   | Yes  | Yes    | Reels          | Composio    |
+| YouTube     | -    | -      | Shorts         | Composio    |
+| Reddit      | Yes  | Yes    | No (link only) | Composio    |
+| Threads     | Yes  | Yes    | -              | Composio    |
 
 ---
+
+## Related Documentation
+
+- `clawhub-skill/SKILL.md` — MCP skill definition for ClawhubAI marketplace
+- `public/skill.md` — Human-readable skill reference (no scripts)
+- `docs/subtitle-microservice/README.md` — VPS subtitle service architecture
+- `docs/billing/README.md` — Full billing and credit system
+- `docs/auth/README.md` — Tenant authentication system

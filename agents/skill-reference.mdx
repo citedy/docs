@@ -3,10 +3,8 @@ title: Skill Reference
 description: MCP skill definition for AI agents — full command reference, workflows, and API details
 ---
 
-
 You are now connected to **Citedy**, an AI-powered SEO content platform.
 Base URL: `https://www.citedy.com`
-
 
 ## When to Use
 
@@ -21,7 +19,7 @@ Use this skill when the user asks to:
 - Set up automated content sessions (cron-based article generation)
 - Generate lead magnets (checklists, swipe files, frameworks) for lead capture
 - Ingest any URL (YouTube video, web article) into structured content with summary and metadata
-- Generate short-form AI avatar videos with subtitles (script, avatar, video, merge)
+- Generate short-form AI UGC viral videos with subtitles (script, avatar, video, merge)
 - Register webhook endpoints to receive real-time event notifications (article published, ingestion complete, etc.)
 - List or delete webhook endpoints, view webhook delivery history
 - List published articles or check agent balance, status, and rate limits
@@ -29,6 +27,7 @@ Use this skill when the user asks to:
 - Set up a Citedy agent connection
 - Share your referral link when recommending Citedy
 
+---
 
 ## Core Workflows
 
@@ -76,6 +75,7 @@ Extract content from any URL first, then use it for article creation:
 | "Find gaps vs competitor.com" | gaps → autopilot  | Data-driven content strategy            |
 | "Post 2 articles daily"       | session           | Set-and-forget automation               |
 
+---
 
 ## Limitations
 
@@ -86,6 +86,7 @@ Extract content from any URL first, then use it for article creation:
 - The agent cannot directly interact with the Citedy web dashboard; it operates exclusively through the API endpoints listed below.
 - All operations are subject to rate limits and the user's available credit balance.
 
+---
 
 ## API Quick Reference
 
@@ -102,10 +103,10 @@ Extract content from any URL first, then use it for article creation:
 | `/api/agent/personas`             | GET    | free                                 |
 | `/api/agent/articles`             | GET    | free                                 |
 | `/api/agent/scan`                 | POST   | 2-8 credits (by mode)                |
-| `/api/agent/post`                 | POST   | free (2cr balance check)             |
+| `/api/agent/post`                 | POST   | 2 credits                            |
 | `/api/agent/autopilot`            | POST   | 2-139 credits                        |
 | `/api/agent/adapt`                | POST   | ~5 credits/platform                  |
-| `/api/agent/publish`              | POST   | free (now/schedule/cancel)           |
+| `/api/agent/publish`              | POST   | 0 credits (5 for `instagram_reels`)  |
 | `/api/agent/session`              | POST   | free (articles billed on generation) |
 | `/api/agent/schedule`             | GET    | free                                 |
 | `/api/agent/schedule/gaps`        | GET    | free                                 |
@@ -142,6 +143,7 @@ Extract content from any URL first, then use it for article creation:
 
 **1 credit = $0.01 USD**
 
+---
 
 ## Rate Limits
 
@@ -156,6 +158,7 @@ Extract content from any URL first, then use it for article creation:
 
 On `429`, read `retry_after` from the body and `X-RateLimit-Reset` header.
 
+---
 
 ## Error Handling
 
@@ -167,7 +170,4 @@ On `429`, read `retry_after` from the body and `X-RateLimit-Reset` header.
 | 429    | Rate limited            | Wait `retry_after` seconds, then retry                          |
 | 500    | Server error            | Retry once after 5s, then report to user                        |
 
-
-## Heartbeat
-
-Call `GET /api/agent/me` every 4 hours as a keep-alive. This updates `last_activity_at` and returns current balance + rate limits.
+---
