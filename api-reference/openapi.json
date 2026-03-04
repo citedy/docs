@@ -3897,6 +3897,11 @@
             "items": {
               "type": "object",
               "properties": {
+                "id": {
+                  "type": ["string", "null"],
+                  "format": "uuid",
+                  "description": "Social account UUID — use as accountId when publishing"
+                },
                 "platform": {
                   "type": "string"
                 },
@@ -3907,7 +3912,7 @@
                   "type": ["string", "null"]
                 }
               },
-              "required": ["platform", "connected", "account_name"]
+              "required": ["id", "platform", "connected", "account_name"]
             }
           },
           "stats_url": {
