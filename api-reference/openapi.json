@@ -4395,6 +4395,16 @@
       "AdaptationItem": {
         "type": "object",
         "properties": {
+          "adaptationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Adaptation UUID — pass directly to publish endpoint"
+          },
+          "accountId": {
+            "type": ["string", "null"],
+            "format": "uuid",
+            "description": "Social account UUID — pass directly to publish endpoint (null if not connected)"
+          },
           "platform": {
             "type": "string"
           },
@@ -4415,6 +4425,8 @@
           }
         },
         "required": [
+          "adaptationId",
+          "accountId",
           "platform",
           "content",
           "credits_used",
