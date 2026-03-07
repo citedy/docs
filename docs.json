@@ -222,6 +222,7 @@
             "pages": [
               "api-reference/lead-magnets/generate-lead-magnet",
               "api-reference/lead-magnets/get-lead-magnet-statusdetails",
+              "api-reference/lead-magnets/long-poll-wait-for-lead-magnet-completion",
               "api-reference/lead-magnets/publish-or-archive-lead-magnet"
             ]
           },
@@ -248,6 +249,12 @@
               "api-reference/seo-tools/plan-internal-links-from-page-+-targets",
               "api-reference/seo-tools/start-async-ai-brand-visibility-scan",
               "api-reference/seo-tools/validate-page-json-ld-schema-markup"
+            ]
+          },
+          {
+            "group": "Articles",
+            "pages": [
+              "api-reference/articles/get-queued-article-generation-status-or-result-by-id"
             ]
           }
         ]

@@ -1,11 +1,11 @@
 ---
 title: MCP Tools Reference
-description: Complete list of 52 MCP tools available via the Citedy MCP server
+description: Complete list of 53 MCP tools available via the Citedy MCP server
 ---
 
 # MCP Tools Reference
 
-The Citedy MCP server exposes **52 tools**. Each tool maps to an Agent API endpoint.
+The Citedy MCP server exposes **53 tools**. Each tool maps to an Agent API endpoint.
 
 Endpoint: `https://mcp.citedy.com/mcp`
 
@@ -28,6 +28,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 | Tool | Description | Endpoint |
 |---|---|---|
 | `article.generate` | Generate a new article using the autopilot flow and current workspace settings. | `POST /api/agent/autopilot` |
+| `article.get` | Get queued article generation status or final generated article result by ID. | `GET /api/agent/articles/{id}` |
 | `article.list` | List previously generated articles for the current workspace. | `GET /api/agent/articles` |
 
 ## brand
@@ -155,6 +156,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 
 These tools may return `"status": "processing"` and polling instructions:
 
+- `article.generate` -> poll with `article.get` using `id`
 - `brand.scan` -> poll with `brand.scan.get` using `id`
 - `ingest.batch` -> poll with `ingest.get` using `id`
 - `ingest.create` -> poll with `ingest.get` using `id`

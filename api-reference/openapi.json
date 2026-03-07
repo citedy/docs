@@ -44,6 +44,10 @@
       "description": "Article generation and retrieval"
     },
     {
+      "name": "Articles",
+      "description": "Queued article generation job polling"
+    },
+    {
       "name": "Adaptations",
       "description": "Social adaptation generation"
     },
@@ -649,6 +653,16 @@
               }
             }
           },
+          "202": {
+            "description": "Article generation accepted for async processing. Poll GET /api/agent/articles/{id} for status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutopilotQueuedResponse"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
@@ -1033,6 +1047,57 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/api/agent/lead-magnets/{id}/wait": {
+      "get": {
+        "tags": ["Lead Magnets"],
+        "operationId": "waitForLeadMagnet",
+        "summary": "Long-poll wait for lead magnet completion",
+        "description": "Hangs open up to 25s polling for generation completion. Call immediately after POST /lead-magnets. Returns full result when ready, progress on timeout, or error on failure.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Lead magnet run ID from POST response"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 25
+            },
+            "description": "Max wait seconds (clamped 1-25)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lead magnet result, progress, or failure"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
           }
         }
       }
@@ -3518,6 +3583,55 @@
           }
         }
       }
+    },
+    "/api/agent/articles/{id}": {
+      "get": {
+        "tags": ["Articles"],
+        "operationId": "getArticleJobStatus",
+        "summary": "Get queued article generation status or result by ID",
+        "description": "Poll for the status of a queued article generation job. Returns processing status while the article is being generated, or the final result (success/failure) once complete.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The job ID returned by POST /api/agent/autopilot when wait_for_completion is false"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status or completed article result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticleJobStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4222,6 +4336,11 @@
           "disable_competition": {
             "type": "boolean",
             "default": false
+          },
+          "wait_for_completion": {
+            "type": "boolean",
+            "description": "Wait synchronously for article completion before returning. When false, returns 202 with a job ID for polling via GET /api/agent/articles/{id}.",
+            "default": true
           }
         },
         "additionalProperties": false
@@ -4296,6 +4415,31 @@
         },
         "required": ["title", "slug", "status", "word_count", "credits_used"],
         "additionalProperties": true
+      },
+      "AutopilotQueuedResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing"]
+          },
+          "queued": {
+            "type": "boolean",
+            "enum": [true]
+          },
+          "topic": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "status", "queued", "message"],
+        "additionalProperties": false
       },
       "ArticleSummary": {
         "type": "object",
@@ -7007,6 +7151,74 @@
             "type": "string"
           }
         }
+      },
+      "ArticleJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["processing", "published", "failed"]
+          },
+          "queued": {
+            "type": "boolean"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "article_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "article_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["standard", "turbo", "turbo+"]
+          },
+          "word_count": {
+            "type": "integer"
+          },
+          "credits_used": {
+            "type": "number"
+          },
+          "estimated_total_credits": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "trust_level": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object",
+            "properties": {
+              "illustrations": {},
+              "audio": {},
+              "competition_intelligence": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "required": ["status"]
       }
     }
   }
