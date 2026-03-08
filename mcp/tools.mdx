@@ -27,7 +27,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 
 | Tool | Description | Endpoint |
 |---|---|---|
-| `article.generate` | Start article generation via autopilot. This tool usually returns a queued article id first; always poll article.get with that id until status is completed or failed. | `POST /api/agent/autopilot` |
+| `article.generate` | Generate and publish an SEO-optimized article. Returns the published article with its URL when complete. May take 30-90 seconds. | `POST /api/agent/autopilot` |
 | `article.get` | Poll a queued article job by id. Use the id returned by article.generate to get the current status or the final generated article result. | `GET /api/agent/articles/{id}` |
 | `article.list` | List previously generated articles for the current workspace. | `GET /api/agent/articles` |
 
