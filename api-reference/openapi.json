@@ -626,7 +626,7 @@
         "tags": ["Autopilot"],
         "operationId": "generateAutopilotArticle",
         "summary": "Generate article",
-        "description": "Current runtime behavior keeps auto-publish semantics and returns published status in response.",
+        "description": "Generate an article from a topic or source URLs. Returns status 'publishing' when auto_publish is true (default) or 'generated' when auto_publish is false (draft mode). The final 'published' status is reflected in GET /api/agent/articles/{id} after the publish pipeline completes.",
         "security": [
           {
             "AgentApiKey": []
@@ -3631,6 +3631,193 @@
             "$ref": "#/components/responses/InternalError"
           }
         }
+      },
+      "patch": {
+        "tags": ["Articles"],
+        "operationId": "unpublishArticle",
+        "summary": "Unpublish an article (revert to draft)",
+        "description": "Set article status back to 'generated'. The article remains in the system but is removed from the public blog. Only articles with status 'published' can be unpublished; attempting to unpublish an article in any other status returns 400.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Article ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action"],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": ["unpublish"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Article unpublished successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "article_id": { "type": "string", "format": "uuid" },
+                    "status": { "type": "string", "enum": ["generated"] },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": {
+            "description": "Article is not in the required state for this operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Conflict" },
+                    "message": {
+                      "type": "string",
+                      "example": "Cannot unpublish article with status \"generated\""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "tags": ["Articles"],
+        "operationId": "deleteArticle",
+        "summary": "Permanently delete an article",
+        "description": "Permanently delete an article regardless of its current status (generated, published, failed, etc.). Performs cascading cleanup: removes the article database record and associated storage files (illustrations, voice-overs) on a best-effort basis. This operation is permanent and cannot be undone.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Article ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Article deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "article_id": { "type": "string", "format": "uuid" },
+                    "status": { "type": "string", "enum": ["deleted"] },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/agent/articles/{id}/publish": {
+      "post": {
+        "tags": ["Articles"],
+        "operationId": "publishArticle",
+        "summary": "Publish a draft article",
+        "description": "Trigger the publish pipeline for a draft article (status=generated). The article will be available on the public blog shortly after.",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Article ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publish pipeline triggered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "article_id": { "type": "string", "format": "uuid" },
+                    "status": {
+                      "type": "string",
+                      "enum": ["publishing", "published"]
+                    },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": {
+            "description": "Article is not in the required state for this operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Conflict" },
+                    "message": {
+                      "type": "string",
+                      "example": "Cannot publish article with status \"failed\""
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
       }
     }
   },
@@ -4341,6 +4528,10 @@
             "type": "boolean",
             "description": "Wait synchronously for article completion before returning. When false, returns 202 with a job ID for polling via GET /api/agent/articles/{id}.",
             "default": true
+          },
+          "auto_publish": {
+            "type": "boolean",
+            "description": "Publish article immediately after generation. When false, article stays as draft (status=generated). Uses tenant setting when omitted."
           }
         },
         "additionalProperties": false
@@ -4384,10 +4575,13 @@
           },
           "article_url": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "URL where the article will be accessible once published. For draft articles (auto_publish: false), this URL will return 404 until the article is published."
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": ["publishing", "generated"],
+            "description": "publishing — article generation complete, publish pipeline triggered (will be live within seconds). generated — draft article, not yet published (use article.publish to make it live)."
           },
           "mode": {
             "type": "string"
@@ -7161,7 +7355,14 @@
           },
           "status": {
             "type": "string",
-            "enum": ["processing", "published", "failed"]
+            "enum": [
+              "processing",
+              "generated",
+              "publishing",
+              "published",
+              "failed"
+            ],
+            "description": "processing — generation in progress. generated — draft, not yet published. publishing — publish pipeline triggered. published — live on blog. failed — generation or publish failed."
           },
           "queued": {
             "type": "boolean"
@@ -7183,7 +7384,8 @@
           },
           "article_url": {
             "type": "string",
-            "format": "uri"
+            "format": "uri",
+            "description": "URL where the article will be accessible once published. Returns 404 for draft (generated) articles until published."
           },
           "mode": {
             "type": "string",

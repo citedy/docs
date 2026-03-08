@@ -1,11 +1,11 @@
 ---
 title: MCP Tools Reference
-description: Complete list of 53 MCP tools available via the Citedy MCP server
+description: Complete list of 56 MCP tools available via the Citedy MCP server
 ---
 
 # MCP Tools Reference
 
-The Citedy MCP server exposes **53 tools**. Each tool maps to an Agent API endpoint.
+The Citedy MCP server exposes **56 tools**. Each tool maps to an Agent API endpoint.
 
 Endpoint: `https://mcp.citedy.com/mcp`
 
@@ -27,9 +27,12 @@ Endpoint: `https://mcp.citedy.com/mcp`
 
 | Tool | Description | Endpoint |
 |---|---|---|
-| `article.generate` | Generate and publish an SEO-optimized article. Returns the published article with its URL when complete. May take 30-90 seconds. | `POST /api/agent/autopilot` |
+| `article.delete` | Permanently delete an article and its associated storage files. | `DELETE /api/agent/articles/{id}` |
+| `article.generate` | Generate an SEO-optimized article. By default publishes immediately; set auto_publish=false to create as draft. May take 30-90 seconds. | `POST /api/agent/autopilot` |
 | `article.get` | Poll a queued article job by id. Use the id returned by article.generate to get the current status or the final generated article result. | `GET /api/agent/articles/{id}` |
 | `article.list` | List previously generated articles for the current workspace. | `GET /api/agent/articles` |
+| `article.publish` | Publish a draft article. Use after generating with auto_publish=false to trigger the publish pipeline. | `POST /api/agent/articles/{id}/publish` |
+| `article.unpublish` | Unpublish an article (revert to draft status). The article remains accessible for editing but is removed from the public blog. | `PATCH /api/agent/articles/{id}` |
 
 ## brand
 

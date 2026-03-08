@@ -254,7 +254,10 @@
           {
             "group": "Articles",
             "pages": [
-              "api-reference/articles/get-queued-article-generation-status-or-result-by-id"
+              "api-reference/articles/get-queued-article-generation-status-or-result-by-id",
+              "api-reference/articles/permanently-delete-an-article",
+              "api-reference/articles/publish-a-draft-article",
+              "api-reference/articles/unpublish-an-article-revert-to-draft"
             ]
           }
         ]
