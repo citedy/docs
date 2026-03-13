@@ -1712,7 +1712,7 @@
       "post": {
         "tags": ["Publishing"],
         "operationId": "publishSocialAdaptation",
-        "summary": "Publish, schedule, or cancel a social adaptation",
+        "summary": "Publish, schedule, cancel, or direct-publish (as-is) social content",
         "security": [
           {
             "AgentApiKey": []
@@ -5837,6 +5837,25 @@
         "additionalProperties": false
       },
       "PublishRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PublishAdaptationRequest"
+          },
+          {
+            "$ref": "#/components/schemas/PublishRawRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "action",
+          "mapping": {
+            "now": "#/components/schemas/PublishAdaptationRequest",
+            "schedule": "#/components/schemas/PublishAdaptationRequest",
+            "cancel": "#/components/schemas/PublishAdaptationRequest",
+            "publish_raw": "#/components/schemas/PublishRawRequest"
+          }
+        }
+      },
+      "PublishAdaptationRequest": {
         "type": "object",
         "properties": {
           "adaptationId": {
@@ -5874,6 +5893,34 @@
         "required": ["adaptationId", "action", "platform", "accountId"],
         "additionalProperties": false
       },
+      "PublishRawRequest": {
+        "type": "object",
+        "description": "Direct publish article content as-is to a social platform. No AI adaptation, 0 credits.",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["publish_raw"]
+          },
+          "articleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["linkedin", "facebook", "x_article", "reddit", "instagram"]
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subreddit": {
+            "type": "string",
+            "description": "Required when platform is reddit"
+          }
+        },
+        "required": ["action", "articleId", "platform", "accountId"],
+        "additionalProperties": false
+      },
       "PublishResponse": {
         "type": "object",
         "properties": {
@@ -5883,7 +5930,7 @@
           },
           "action": {
             "type": "string",
-            "enum": ["now", "schedule", "cancel"]
+            "enum": ["now", "schedule", "cancel", "publish_raw"]
           },
           "adaptationId": {
             "type": "string",
@@ -5892,6 +5939,10 @@
           "postId": {
             "type": ["string", "null"],
             "description": "Present when action=now"
+          },
+          "platformPostId": {
+            "type": ["string", "null"],
+            "description": "Present when action=publish_raw"
           },
           "scheduledAt": {
             "type": ["string", "null"],
@@ -5905,6 +5956,10 @@
           "deduplicated": {
             "type": "boolean",
             "description": "True if publish was skipped because already published"
+          },
+          "warning": {
+            "type": "string",
+            "description": "Present when publish_raw encounters a non-fatal issue"
           }
         },
         "required": ["success", "action", "adaptationId"],
