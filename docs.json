@@ -259,6 +259,12 @@
               "api-reference/articles/publish-a-draft-article",
               "api-reference/articles/unpublish-an-article-revert-to-draft"
             ]
+          },
+          {
+            "group": "Gsc",
+            "pages": [
+              "api-reference/gsc/get-gsc-performance-report"
+            ]
           }
         ]
       }

@@ -1,11 +1,11 @@
 ---
 title: MCP Tools Reference
-description: Complete list of 56 MCP tools available via the Citedy MCP server
+description: Complete list of 57 MCP tools available via the Citedy MCP server
 ---
 
 # MCP Tools Reference
 
-The Citedy MCP server exposes **56 tools**. Each tool maps to an Agent API endpoint.
+The Citedy MCP server exposes **57 tools**. Each tool maps to an Agent API endpoint.
 
 Endpoint: `https://mcp.citedy.com/mcp`
 
@@ -54,6 +54,12 @@ Endpoint: `https://mcp.citedy.com/mcp`
 |---|---|---|
 | `gaps.generate` | Generate SEO/GEO content gap opportunities. | `POST /api/agent/gaps/generate` |
 | `gaps.list` | List saved content gaps. | `GET /api/agent/gaps` |
+
+## gsc
+
+| Tool | Description | Endpoint |
+|---|---|---|
+| `gsc.report` | Get Google Search Console performance report: clicks, impressions, CTR, avg position, top queries, top pages, position movers, content opportunities, and article suggestions. Returns connect URL if GSC is not linked. Free (0 credits). | `GET /api/agent/gsc/report` |
 
 ## Content Ingestion
 

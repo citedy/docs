@@ -106,6 +106,10 @@
     {
       "name": "SEO Tools",
       "description": "Agent-authenticated SEO diagnostics tools exposed via MCP seo.* namespace."
+    },
+    {
+      "name": "GSC",
+      "description": "Google Search Console integration and reporting"
     }
   ],
   "paths": {
@@ -3816,6 +3820,131 @@
               }
             }
           },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/agent/gsc/report": {
+      "get": {
+        "tags": ["GSC"],
+        "operationId": "getGscReport",
+        "summary": "Get GSC performance report",
+        "description": "Returns Google Search Console performance report with clicks, impressions, CTR, positions, top queries, top pages, movers, opportunities, and article suggestions. Returns connect URL if GSC is not linked. Free (0 credits).",
+        "security": [{ "AgentApiKey": [] }],
+        "parameters": [
+          {
+            "name": "force_refresh",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "boolean" },
+            "description": "Force fresh GSC data fetch instead of cached morning report"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GSC report (connected) or connect URL (not connected)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "connected": { "type": "boolean", "enum": [true] },
+                        "cached": { "type": "boolean" },
+                        "reportDate": { "type": "string", "format": "date" },
+                        "gscProperty": { "type": "string" },
+                        "rangeDays": { "type": "integer" },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "clicks": { "type": "integer" },
+                            "impressions": { "type": "integer" },
+                            "ctr": { "type": "number" },
+                            "position": { "type": "number" },
+                            "clicksChangePct": { "type": ["number", "null"] },
+                            "impressionsChangePct": {
+                              "type": ["number", "null"]
+                            }
+                          }
+                        },
+                        "topQueries": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "query": { "type": "string" },
+                              "clicks": { "type": "integer" },
+                              "impressions": { "type": "integer" },
+                              "ctr": { "type": "number" },
+                              "position": { "type": "number" }
+                            }
+                          }
+                        },
+                        "topPages": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "page": { "type": "string" },
+                              "clicks": { "type": "integer" },
+                              "impressions": { "type": "integer" },
+                              "ctr": { "type": "number" },
+                              "position": { "type": "number" }
+                            }
+                          }
+                        },
+                        "movers": {
+                          "type": "object",
+                          "properties": {
+                            "gainers": {
+                              "type": "array",
+                              "items": { "type": "object" }
+                            },
+                            "losers": {
+                              "type": "array",
+                              "items": { "type": "object" }
+                            }
+                          }
+                        },
+                        "opportunities": {
+                          "type": "array",
+                          "items": { "type": "object" }
+                        },
+                        "articleSuggestions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "keyword": { "type": "string" },
+                              "reason": { "type": "string" },
+                              "impressions": { "type": "integer" },
+                              "position": { "type": "number" },
+                              "opportunityScore": { "type": "integer" },
+                              "workflow": { "type": "string" }
+                            }
+                          }
+                        }
+                      },
+                      "required": ["connected", "reportDate", "summary"]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "connected": { "type": "boolean", "enum": [false] },
+                        "connect_url": { "type": "string", "format": "uri" },
+                        "message": { "type": "string" }
+                      },
+                      "required": ["connected", "connect_url", "message"]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
           "500": { "$ref": "#/components/responses/InternalError" }
         }
       }
