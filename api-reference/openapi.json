@@ -3920,7 +3920,7 @@
                               "reason": { "type": "string" },
                               "impressions": { "type": "integer" },
                               "position": { "type": "number" },
-                              "opportunityScore": { "type": "integer" },
+                              "opportunityScore": { "type": "number" },
                               "workflow": { "type": "string" }
                             }
                           }
