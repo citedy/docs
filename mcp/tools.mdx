@@ -1,11 +1,11 @@
 ---
 title: MCP Tools Reference
-description: Complete list of 57 MCP tools available via the Citedy MCP server
+description: Complete list of 58 MCP tools available via the Citedy MCP server
 ---
 
 # MCP Tools Reference
 
-The Citedy MCP server exposes **57 tools**. Each tool maps to an Agent API endpoint.
+The Citedy MCP server exposes **58 tools**. Each tool maps to an Agent API endpoint.
 
 Endpoint: `https://mcp.citedy.com/mcp`
 
@@ -144,6 +144,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 | `shorts.generate` | Generate shorts video and return poll instructions until final video URL is ready. | `POST /api/agent/shorts` |
 | `shorts.get` | Get shorts generation status/result by ID. | `GET /api/agent/shorts/{id}` |
 | `shorts.merge` | Merge 2-4 short clips, apply subtitle phrases, and return final video URL. | `POST /api/agent/shorts/merge` |
+| `shorts.publish` | Publish a generated short video directly to YouTube Shorts and/or Instagram Reels. Does not require an article — derives title/description/hashtags from speech_text via LLM. Instagram Reels costs 5 credits; YouTube Shorts is free. Returns per-platform results and timings. | `POST /api/agent/shorts/publish` |
 | `shorts.script` | Generate short-form video script text (hook/educational/cta styles). | `POST /api/agent/shorts/script` |
 
 ## Publishing

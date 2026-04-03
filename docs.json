@@ -214,7 +214,8 @@
               "api-reference/shorts/generate-shorts-avatar",
               "api-reference/shorts/generate-shorts-script",
               "api-reference/shorts/get-shorts-generation-status-by-id",
-              "api-reference/shorts/merge-shorts-videos-and-add-subtitles"
+              "api-reference/shorts/merge-shorts-videos-and-add-subtitles",
+              "api-reference/shorts/publish-short-video-to-youtube-shorts-andor-instagram-reels"
             ]
           },
           {

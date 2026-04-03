@@ -2633,6 +2633,55 @@
         }
       }
     },
+    "/api/agent/shorts/publish": {
+      "post": {
+        "tags": ["Shorts"],
+        "operationId": "publishShortVideo",
+        "summary": "Publish short video to YouTube Shorts and/or Instagram Reels",
+        "security": [
+          {
+            "AgentApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortsPublishRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Publish completed (check per-platform results)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortsPublishResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
     "/api/agent/tools/meta-tags": {
       "post": {
         "tags": ["SEO Tools"],
@@ -7255,6 +7304,98 @@
           }
         },
         "additionalProperties": false
+      },
+      "ShortsPublishTarget": {
+        "type": "object",
+        "required": ["platform", "account_id"],
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": ["youtube_shorts", "instagram_reels"]
+          },
+          "account_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Connected social account ID"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsPublishRequest": {
+        "type": "object",
+        "required": ["video_url", "speech_text", "targets"],
+        "properties": {
+          "video_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "HTTPS URL of the video on download.citedy.com or Supabase storage"
+          },
+          "speech_text": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 2000,
+            "description": "Spoken text from the video for metadata generation"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortsPublishTarget"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Platforms to publish to (max 2, no duplicate platforms)"
+          },
+          "privacy_status": {
+            "type": "string",
+            "enum": ["public", "unlisted", "private"],
+            "default": "public",
+            "description": "YouTube privacy status (ignored for Instagram)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ShortsPublishResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "platform": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean"
+                },
+                "post_id": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "metadata_provider": {
+            "type": "string",
+            "description": "LLM provider used for metadata generation"
+          },
+          "metadata_degraded": {
+            "type": "boolean",
+            "description": "True if AI metadata generation failed and static fallback was used"
+          },
+          "timings": {
+            "type": "object",
+            "properties": {
+              "metadata_ms": { "type": "number" },
+              "total_ms": { "type": "number" }
+            }
+          },
+          "credits_charged": {
+            "type": "number"
+          }
+        }
       },
       "ShortsMergeRequest": {
         "type": "object",
