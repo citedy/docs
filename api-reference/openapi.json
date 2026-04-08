@@ -4704,8 +4704,8 @@
           },
           "wait_for_completion": {
             "type": "boolean",
-            "description": "Wait synchronously for article completion. Default false (async) — returns 202 with job ID for polling via GET /api/agent/articles/{id}. Set true only for turbo mode or short articles.",
-            "default": false
+            "description": "Wait synchronously for article completion before returning. When false, returns 202 with a job ID for polling via GET /api/agent/articles/{id}.",
+            "default": true
           },
           "auto_publish": {
             "type": "boolean",
