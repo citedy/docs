@@ -2637,7 +2637,7 @@
       "post": {
         "tags": ["Shorts"],
         "operationId": "publishShortVideo",
-        "summary": "Publish short video to YouTube Shorts and/or Instagram Reels",
+        "summary": "Publish short video to YouTube Shorts, Instagram Reels, and/or TikTok",
         "security": [
           {
             "AgentApiKey": []
@@ -7311,7 +7311,7 @@
         "properties": {
           "platform": {
             "type": "string",
-            "enum": ["youtube_shorts", "instagram_reels"]
+            "enum": ["youtube_shorts", "instagram_reels", "tiktok"]
           },
           "account_id": {
             "type": "string",
@@ -7342,14 +7342,14 @@
               "$ref": "#/components/schemas/ShortsPublishTarget"
             },
             "minItems": 1,
-            "maxItems": 2,
-            "description": "Platforms to publish to (max 2, no duplicate platforms)"
+            "maxItems": 3,
+            "description": "Platforms to publish to (max 3). Duplicate platforms are rejected by runtime validation."
           },
           "privacy_status": {
             "type": "string",
             "enum": ["public", "unlisted", "private"],
             "default": "public",
-            "description": "YouTube privacy status (ignored for Instagram)"
+            "description": "Privacy setting for publish targets: used for YouTube Shorts, mapped to TikTok visibility when supported, and ignored for Instagram Reels."
           }
         },
         "additionalProperties": false
@@ -7372,7 +7372,17 @@
                   "type": "string"
                 },
                 "error": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["code", "message"],
+                  "additionalProperties": false
                 }
               }
             }
@@ -7390,7 +7400,8 @@
             "properties": {
               "metadata_ms": { "type": "number" },
               "total_ms": { "type": "number" }
-            }
+            },
+            "additionalProperties": { "type": "number" }
           },
           "credits_charged": {
             "type": "number"
