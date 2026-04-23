@@ -7349,7 +7349,7 @@
             "type": "string",
             "enum": ["public", "unlisted", "private"],
             "default": "public",
-            "description": "Privacy setting for publish targets: used for YouTube Shorts, mapped to TikTok visibility when supported, and ignored for Instagram Reels."
+            "description": "Publish privacy. YouTube supports public/unlisted/private; TikTok currently requires private until app review approves public posting; Instagram Reels ignores this field."
           }
         },
         "additionalProperties": false
