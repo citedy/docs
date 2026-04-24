@@ -7254,6 +7254,31 @@
           "credits_charged": {
             "type": "integer",
             "minimum": 0
+          },
+          "prompt_used": {
+            "type": "string",
+            "description": "Full image prompt used for this generation (same input params can yield different prompts for diversity)."
+          },
+          "prompt_meta": {
+            "$ref": "#/components/schemas/ShortsAvatarPromptMeta"
+          }
+        }
+      },
+      "ShortsAvatarPromptMeta": {
+        "type": "object",
+        "required": ["age_years", "variation_tags"],
+        "properties": {
+          "age_years": {
+            "type": "integer",
+            "minimum": 18,
+            "maximum": 50
+          },
+          "variation_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Server-sampled appearance and location tags for debugging and diversity checks."
           }
         }
       },
