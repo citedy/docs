@@ -7353,7 +7353,7 @@
           "video_url": {
             "type": "string",
             "format": "uri",
-            "description": "HTTPS URL of the video on download.citedy.com or Supabase storage"
+            "description": "HTTPS URL of the video. Must be hosted on download.citedy.com (path must start with `agent/shorts/` or `agent/reels/`) or Supabase storage. The R2 prefix restriction ensures Meta's `facebookexternalhit` crawler can fetch the video via our `/media/shorts/...` proxy on www.citedy.com — direct R2 URLs are blocked by the bucket's default `Disallow: /` robots.txt and cause Instagram Reel publish to fail."
           },
           "speech_text": {
             "type": "string",
