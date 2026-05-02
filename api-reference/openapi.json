@@ -7066,6 +7066,49 @@
           }
         }
       },
+      "ShortsProviderAttempt": {
+        "type": "object",
+        "required": [
+          "provider",
+          "model",
+          "status",
+          "requestedDurationSeconds",
+          "providerBilledSeconds",
+          "generationCostUsd",
+          "costSource"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["xAI", "Veo", "Veo+Merge"]
+          },
+          "model": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["started", "succeeded", "failed", "skipped"]
+          },
+          "requestedDurationSeconds": {
+            "type": "integer",
+            "enum": [5, 10, 15]
+          },
+          "providerBilledSeconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "generationCostUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "costSource": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
       "ShortsStatusResponse": {
         "type": "object",
         "required": [
@@ -7075,7 +7118,8 @@
           "video_url",
           "error",
           "subtitles_applied",
-          "subtitle_warning"
+          "subtitle_warning",
+          "provider_attempts"
         ],
         "properties": {
           "id": {
@@ -7102,6 +7146,48 @@
           },
           "subtitle_warning": {
             "type": ["string", "null"]
+          },
+          "provider": {
+            "type": ["string", "null"],
+            "description": "Provider that produced the completed video."
+          },
+          "model": {
+            "type": ["string", "null"],
+            "description": "Provider model used for the completed video."
+          },
+          "provider_strategy": {
+            "type": ["string", "null"],
+            "description": "Requested provider strategy for the completed video."
+          },
+          "requested_duration_seconds": {
+            "type": ["integer", "null"],
+            "enum": [5, 10, 15, null]
+          },
+          "actual_duration_seconds": {
+            "type": ["number", "null"]
+          },
+          "provider_billed_seconds": {
+            "type": ["integer", "null"]
+          },
+          "billed_duration": {
+            "type": ["integer", "null"],
+            "enum": [5, 10, 15, null]
+          },
+          "generation_cost_usd": {
+            "type": ["number", "null"]
+          },
+          "generation_cost_source": {
+            "type": ["string", "null"]
+          },
+          "provider_attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortsProviderAttempt"
+            }
+          },
+          "downgraded_from_duration": {
+            "type": ["integer", "null"],
+            "enum": [5, 10, 15, null]
           }
         }
       },
@@ -7127,6 +7213,11 @@
             "type": "string",
             "enum": ["short", "long"],
             "default": "short"
+          },
+          "requested_duration_seconds": {
+            "type": "integer",
+            "enum": [5, 10, 15],
+            "description": "Exact target runtime in seconds. When present, this controls the script word budget."
           },
           "style": {
             "type": "string",
