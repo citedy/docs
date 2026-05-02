@@ -7470,10 +7470,48 @@
           "privacy_status": {
             "type": "string",
             "enum": ["public", "unlisted", "private"],
-            "default": "public",
-            "description": "Publish privacy. YouTube supports public/unlisted/private; TikTok currently requires private until app review approves public posting; Instagram Reels ignores this field."
+            "description": "Publish privacy. YouTube supports public/unlisted/private. TikTok should use tiktok_privacy_level selected from creator_info; legacy privacy_status=private maps to SELF_ONLY. Instagram Reels ignores this field."
+          },
+          "tiktok_privacy_level": {
+            "type": "string",
+            "enum": [
+              "PUBLIC_TO_EVERYONE",
+              "FOLLOWER_OF_CREATOR",
+              "MUTUAL_FOLLOW_FRIENDS",
+              "SELF_ONLY"
+            ],
+            "description": "TikTok-only visibility level selected by the creator from the latest creator_info privacy_level_options."
           }
         },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "targets": {
+                  "contains": {
+                    "type": "object",
+                    "properties": {
+                      "platform": { "const": "tiktok" }
+                    },
+                    "required": ["platform"]
+                  }
+                }
+              },
+              "required": ["targets"]
+            },
+            "then": {
+              "anyOf": [
+                { "required": ["tiktok_privacy_level"] },
+                {
+                  "properties": {
+                    "privacy_status": { "const": "private" }
+                  },
+                  "required": ["privacy_status"]
+                }
+              ]
+            }
+          }
+        ],
         "additionalProperties": false
       },
       "ShortsPublishResponse": {
