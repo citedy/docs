@@ -370,7 +370,7 @@
         },
         "responses": {
           "200": {
-            "description": "Scout dispatched (async)",
+            "description": "Scout dispatched (async). Poll GET /api/agent/scout/x/{runId} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -422,7 +422,7 @@
         },
         "responses": {
           "200": {
-            "description": "Scout dispatched (async)",
+            "description": "Scout dispatched (async). Poll GET /api/agent/scout/reddit/{runId} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -658,7 +658,7 @@
             }
           },
           "202": {
-            "description": "Article generation accepted for async processing. Poll GET /api/agent/articles/{id} for status.",
+            "description": "Article generation accepted for async processing. Poll GET /api/agent/articles/{id} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -878,7 +878,7 @@
         },
         "responses": {
           "200": {
-            "description": "Generation queued",
+            "description": "Generation queued. Poll GET /api/agent/lead-magnets/{id} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1205,7 +1205,7 @@
             }
           },
           "202": {
-            "description": "New job created and processing",
+            "description": "New job created and processing. Poll GET /api/agent/ingest/{id} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2406,7 +2406,7 @@
         },
         "responses": {
           "200": {
-            "description": "Generation accepted",
+            "description": "Generation accepted. Poll GET /api/agent/shorts/{id} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3490,7 +3490,7 @@
         },
         "responses": {
           "200": {
-            "description": "Scan accepted",
+            "description": "Scan accepted. Poll GET /api/agent/tools/brand-scan/{id} with the same Authorization: Bearer <AGENT_API_KEY> header for status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7333,7 +7333,13 @@
       },
       "ShortsAvatarResponse": {
         "type": "object",
-        "required": ["avatar_url", "r2_key", "credits_charged"],
+        "required": [
+          "avatar_url",
+          "r2_key",
+          "credits_charged",
+          "prompt_used",
+          "prompt_meta"
+        ],
         "properties": {
           "avatar_url": {
             "type": "string",
@@ -7444,7 +7450,7 @@
           "video_url": {
             "type": "string",
             "format": "uri",
-            "description": "HTTPS URL of the video. Must be hosted on download.citedy.com (path must start with `agent/shorts/` or `agent/reels/`) or Supabase storage. The R2 prefix restriction ensures Meta's `facebookexternalhit` crawler can fetch the video via our `/media/shorts/...` proxy on www.citedy.com — direct R2 URLs are blocked by the bucket's default `Disallow: /` robots.txt and cause Instagram Reel publish to fail."
+            "description": "HTTPS URL of the video. Must be hosted on download.citedy.com (path must start with `/agent/shorts/` or `/agent/reels/`) or Supabase storage. The R2 prefix restriction ensures Meta's `facebookexternalhit` crawler can fetch the video via our `/media/shorts/...` proxy on www.citedy.com — direct R2 URLs are blocked by the bucket's default `Disallow: /` robots.txt and cause Instagram Reel publish to fail."
           },
           "speech_text": {
             "type": "string",
