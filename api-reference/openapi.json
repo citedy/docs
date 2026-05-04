@@ -545,9 +545,34 @@
         "tags": ["Gaps"],
         "operationId": "listContentGaps",
         "summary": "List content gaps",
+        "description": "List saved content gaps. Optional `favorite_id` scopes results to a product/identity (hybrid filter keeps legacy NULL gaps visible via domain-match).",
         "security": [
           {
             "AgentApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "favorite_id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Filter to gaps tagged with this favorite. Owner-checked against tenant — cross-tenant favorites return 403. The legacy-NULL fallback (rows where favorite_id IS NULL but domain matches) is appended only when the favorite's domain normalizes successfully; if normalization fails, the fallback is dropped and missing legacy gaps may indicate an invalid favorite domain rather than a data bug."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            },
+            "description": "Max items to return."
           }
         ],
         "responses": {
@@ -560,6 +585,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -581,6 +609,7 @@
         "tags": ["Gaps"],
         "operationId": "generateContentGaps",
         "summary": "Generate content gaps",
+        "description": "Generate content gaps from competitor URLs. Optional `favorite_id` scopes the resulting gaps to a product/identity and uses `ai_favorites.domain` as the analysis target instead of the tenant blog domain. Cross-tenant `favorite_id` is rejected with 403 before credits are charged.",
         "security": [
           {
             "AgentApiKey": []
@@ -615,6 +644,9 @@
           },
           "402": {
             "$ref": "#/components/responses/PaymentRequired"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -4588,6 +4620,11 @@
           "description": {
             "type": ["string", "null"]
           },
+          "favorite_id": {
+            "type": ["string", "null"],
+            "format": "uuid",
+            "description": "Favorite (product identity) ID this gap is scoped to, or null for legacy tenant-wide gaps."
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -4626,6 +4663,11 @@
             },
             "minItems": 1,
             "maxItems": 5
+          },
+          "favorite_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional favorite (product identity) ID from ai_favorites. Owner-checked against tenant; gaps are tagged and analysis domain is overridden to ai_favorites.domain."
           }
         },
         "required": ["competitor_urls"],

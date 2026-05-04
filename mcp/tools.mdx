@@ -53,7 +53,7 @@ Endpoint: `https://mcp.citedy.com/mcp`
 | Tool | Description | Endpoint |
 |---|---|---|
 | `gaps.generate` | Generate SEO/GEO content gap opportunities. | `POST /api/agent/gaps/generate` |
-| `gaps.list` | List saved content gaps. | `GET /api/agent/gaps` |
+| `gaps.list` | List saved content gaps. Optional favorite_id filter scopes results to a product/identity (hybrid filter also includes legacy NULL gaps matching favorite.domain). Optional limit (1-100, default 100). | `GET /api/agent/gaps` |
 
 ## gsc
 

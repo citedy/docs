@@ -5,7 +5,7 @@ description: Citedy Agent Platform — architecture, authentication, and capabil
 
 **Contract Snapshot**: 68 Agent API operations · 59 MCP tools
 
-**Version**: 1.7.0 | **Status**: Production | **Updated**: 2026-02-28
+**Version**: 1.8.0 | **Status**: Production | **Updated**: 2026-05-04
 
 Citedy is a backend service for AI agents. Connect once, configure defaults in the web UI, and let any agent — OpenClaw, Claude Code, Cursor, ChatGPT, or any MCP-compatible client — write posts, generate images, publish to social platforms, scan trends, and produce short-form video.
 
@@ -64,6 +64,8 @@ content.total_items: 0                     -> /post or /write
 | `/scan deep`       | POST /api/agent/scan (mode=deep)   | 4 credits      |
 | `/scan ultra`      | POST /api/agent/scan (mode=ultra)  | 6 credits      |
 | `/scan ultra+`     | POST /api/agent/scan (mode=ultra+) | 8 credits      |
+| `/gaps generate`   | POST /api/agent/gaps/generate      | 40 credits     |
+| `/gaps list`       | GET /api/agent/gaps                | 0 credits      |
 | `/products upload` | POST /api/agent/products           | 1 credit       |
 | `/products list`   | GET /api/agent/products            | 0 credits      |
 | `/products search` | POST /api/agent/products/search    | 0 credits      |
@@ -80,27 +82,33 @@ Public MCP v1 intentionally exposes a smaller tool set (see below).
 
 MCP v1 is outcome-first. The goal is to expose stable high-value workflows, not every internal pipeline step.
 
-| MCP Tool              | Backend API Path                     | Notes                          |
-| --------------------- | ------------------------------------ | ------------------------------ |
-| `agent.health`        | `GET /api/agent/health`              | Core diagnostics               |
-| `agent.status`        | `GET /api/agent/status`              | Actionable readiness snapshot  |
-| `settings.get`        | `GET /api/agent/settings`            | Read settings in-agent         |
-| `schedule.gaps`       | `GET /api/agent/schedule/gaps`       | Planning visibility            |
-| `webhooks.deliveries` | `GET /api/agent/webhooks/deliveries` | Delivery debugging             |
-| `products.create`     | `POST /api/agent/products`           | Upload product doc             |
-| `products.list`       | `GET /api/agent/products`            | List product docs              |
-| `products.delete`     | `DELETE /api/agent/products/[id]`    | Remove product doc             |
-| `products.search`     | `POST /api/agent/products/search`    | Search knowledge chunks        |
-| `shorts.generate`     | `POST /api/agent/shorts`             | Returns processing + poll hint |
-| `shorts.get`          | `GET /api/agent/shorts/[id]`         | Poll final video status/url    |
-| `shorts.script`       | `POST /api/agent/shorts/script`      | Generate script text           |
-| `shorts.avatar`       | `POST /api/agent/shorts/avatar`      | Generate avatar image          |
-| `shorts.merge`        | `POST /api/agent/shorts/merge`       | Merge clips + subtitles        |
+| MCP Tool              | Backend API Path                     | Notes                                                                                                      |
+| --------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `agent.health`        | `GET /api/agent/health`              | Core diagnostics                                                                                           |
+| `agent.status`        | `GET /api/agent/status`              | Actionable readiness snapshot                                                                              |
+| `settings.get`        | `GET /api/agent/settings`            | Read settings in-agent                                                                                     |
+| `schedule.gaps`       | `GET /api/agent/schedule/gaps`       | Planning visibility                                                                                        |
+| `webhooks.deliveries` | `GET /api/agent/webhooks/deliveries` | Delivery debugging                                                                                         |
+| `products.create`     | `POST /api/agent/products`           | Upload product doc                                                                                         |
+| `products.list`       | `GET /api/agent/products`            | List product docs                                                                                          |
+| `products.delete`     | `DELETE /api/agent/products/[id]`    | Remove product doc                                                                                         |
+| `products.search`     | `POST /api/agent/products/search`    | Search knowledge chunks                                                                                    |
+| `shorts.generate`     | `POST /api/agent/shorts`             | Returns processing + poll hint                                                                             |
+| `shorts.get`          | `GET /api/agent/shorts/[id]`         | Poll final video status/url                                                                                |
+| `shorts.script`       | `POST /api/agent/shorts/script`      | Generate script text                                                                                       |
+| `shorts.avatar`       | `POST /api/agent/shorts/avatar`      | Generate avatar image                                                                                      |
+| `shorts.merge`        | `POST /api/agent/shorts/merge`       | Merge clips + subtitles                                                                                    |
+| `gaps.generate`       | `POST /api/agent/gaps/generate`      | 40 credits; optional `favorite_id` (uuid) scopes analysis. Owner-checked → 403 cross-tenant before charge.      |
+| `gaps.list`           | `GET /api/agent/gaps`                | Free; optional `?favorite_id=<uuid>&limit=<1-100>`. Hybrid filter keeps legacy NULL gaps via domain match. |
 
 Advanced/deferred for MCP public exposure:
 
 - `settings.update` (safe-field policy needed; web-first by default)
 - `schedule.suggest` (heuristic helper, not a critical contract)
+
+### Recent changes
+
+- **2026-05-04 (v1.8.0)** — `gaps.generate` and `gaps.list` accept optional `favorite_id` (UUID) to scope output to a specific `ai_favorites` row. Owner-checked before charge; cross-tenant returns `403`. `gaps.list` also adds `limit` (1-100). Backwards-compatible: callers that don't pass `favorite_id` see legacy behaviour. PR [#596](https://github.com/nttylock/saas-blog/pull/596).
 
 ---
 
