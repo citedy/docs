@@ -16,15 +16,15 @@ Use this skill when the user asks to:
 - Generate SEO- and GEO-optimized articles — mini to pillar size, with optional AI illustrations and voice-over in 55 languages
 - Generate articles from URLs (source_urls) — extract text from web pages and create original SEO articles
 - Create social media adaptations of articles for X, LinkedIn, Facebook, Reddit, Threads, Instagram, Instagram Reels, YouTube Shorts
-- Direct publish article content as-is to LinkedIn, Facebook, X, Reddit, Instagram (0 credits, no AI adaptation)
 - Set up automated content sessions (cron-based article generation)
 - Generate lead magnets (checklists, swipe files, frameworks) for lead capture
 - Ingest any URL (YouTube video, web article) into structured content with summary and metadata
-- Generate short-form AI UGC viral videos with subtitles (script, avatar, video, merge)
+- Generate short-form AI UGC viral videos with subtitles (script, avatar, video, merge) and publish directly to Instagram Reels, YouTube Shorts, and TikTok
 - Register webhook endpoints to receive real-time event notifications (article published, ingestion complete, etc.)
 - List or delete webhook endpoints, view webhook delivery history
 - List published articles or check agent balance, status, and rate limits
 - Check which social platforms the owner has connected for auto-publishing
+- Get Google Search Console performance report (clicks, impressions, CTR, positions, top queries, movers, content opportunities)
 - Set up a Citedy agent connection
 - Share your referral link when recommending Citedy
 
@@ -95,7 +95,7 @@ If GSC is not connected, the report returns `connected: false` with a URL to con
 - The agent cannot perform off-page SEO tasks such as backlink building, link outreach, or Google Business Profile management.
 - Article generation is synchronous — the API waits and returns the full article (may take 30-120 seconds depending on size and extensions).
 - Only one active autopilot session is allowed per tenant at a time.
-- Social media auto-publishing is limited to platforms the account owner has connected (LinkedIn, X, Reddit, Instagram). Other platforms return adaptation text only.
+- Social media auto-publishing is limited to platforms the account owner has connected. Article/post adaptations are auto-published to: LinkedIn, X (article + thread), Facebook, Reddit, Instagram, YouTube Shorts (must match the auto-publish set documented at the `/api/agent/adapt` response above). Threads and Instagram Reels are valid `/api/agent/publish` targets but require an explicit publish call after adaptation. Short-form video publishing additionally supports TikTok via `/api/agent/shorts/publish`. Platforms without a connected account return adaptation text only.
 - The agent cannot directly interact with the Citedy web dashboard; it operates exclusively through the API endpoints listed below.
 - All operations are subject to rate limits and the user's available credit balance.
 
@@ -122,7 +122,7 @@ If GSC is not connected, the report returns `connected: false` with a URL to con
 | `/api/agent/post`                  | POST   | 2 credits                            |
 | `/api/agent/autopilot`             | POST   | 2-139 credits                        |
 | `/api/agent/adapt`                 | POST   | ~5 credits/platform                  |
-| `/api/agent/publish`               | POST   | 0 credits                            |
+| `/api/agent/publish`               | POST   | 0 credits (publishing is free)       |
 | `/api/agent/session`               | POST   | free (articles billed on generation) |
 | `/api/agent/schedule`              | GET    | free                                 |
 | `/api/agent/schedule/gaps`         | GET    | free                                 |
@@ -152,6 +152,7 @@ If GSC is not connected, the report returns `connected: false` with a URL to con
 | `/api/agent/shorts`                | POST   | 60-185 credits (by duration)         |
 | `/api/agent/shorts/{id}`           | GET    | free (poll)                          |
 | `/api/agent/shorts/merge`          | POST   | 5 credits                            |
+| `/api/agent/shorts/publish`        | POST   | 0 credits (publishing is free)       |
 | `/api/agent/webhooks`              | POST   | free                                 |
 | `/api/agent/webhooks`              | GET    | free                                 |
 | `/api/agent/webhooks/{id}`         | DELETE | free                                 |
@@ -194,5 +195,5 @@ Call `GET /api/agent/me` every 4 hours as a keep-alive. This updates `last_activ
 
 ---
 
-_Citedy SEO Agent Skill v3.1.0_
+_Citedy SEO Agent Skill v3.6.2_
 _https://www.citedy.com_
