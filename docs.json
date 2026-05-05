@@ -39,13 +39,9 @@
             "group": "Platform",
             "pages": [
               "platform/overview",
-              "platform/api"
-            ]
-          },
-          {
-            "group": "Billing",
-            "pages": [
-              "billing/credits"
+              "platform/api",
+              "platform/billing",
+              "platform/settings"
             ]
           },
           {
@@ -276,5 +272,12 @@
     "x": "https://x.com/citaborz",
     "github": "https://github.com/citedy"
   },
-  "subdirectory": "/docs"
+  "subdirectory": "/docs",
+  "redirects": [
+    {
+      "source": "/billing/credits",
+      "destination": "/platform/billing",
+      "permanent": true
+    }
+  ]
 }

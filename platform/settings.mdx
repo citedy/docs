@@ -1,0 +1,352 @@
+---
+title: Agent Settings
+description: Defaults the agent uses when parameters are not specified per request
+---
+
+Agent Settings define the defaults your agent uses when you do not specify parameters per request. They are stored as `agent_config` JSONB inside `autopilot_tenant_settings` (upsert, so safe for new tenants).
+
+---
+
+## Web UI Location
+
+`citedy.com/dashboard/settings/agent`
+
+The page has 7 sections: Platforms, Image Style, Content Tone, Schedule, Timezone, Trust Level, Scan Sources.
+
+The Agent Settings card also includes an inline **Test your agent in 60 seconds** smoke-test banner above Default Platforms. The banner expands in place and uses the MCP tool registry as its source of truth, so the recommended calls stay aligned with the live agent surface.
+
+Smoke-test flow:
+
+1. `agent.status` -> `GET /api/agent/status`
+2. `article.generate` -> `POST /api/agent/autopilot` with `mode: standard`, `size: mini`, `auto_publish: false`, and `wait_for_completion: false`
+3. `article.get` -> `GET /api/agent/articles/{id}`
+
+If an active agent key exists, the UI shows only the stored key prefix in masked form. If no key exists, the banner opens the same `Connect & Create Key` modal used by Team Settings. The full secret key is never read back or rendered after creation.
+
+---
+
+## Settings Flow
+
+```
+  Agent receives command: "/post AI trends"
+              │
+              ▼
+      GET /api/agent/settings
+              │
+      ┌───────┴────────┐
+      │                │
+   Setting          Setting
+   has value         missing
+      │                │
+      ▼                ▼
+  Use default      Ask user
+  silently         (if trustLevel=ask_all)
+                   or use hardcoded
+                   system fallback
+              │
+              ▼
+  User can always override per-request:
+  "/post AI trends tone=casual platforms=linkedin"
+```
+
+---
+
+## All Settings
+
+### defaultPlatforms
+
+Which social platforms to target when not specified per request.
+
+| Field          | Value                                                                                                |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Type           | `string[]`                                                                                           |
+| Allowed values | `linkedin`, `x_article`, `x_thread`, `facebook`, `reddit`, `threads`, `instagram`, `instagram_reels` |
+| Max items      | 10                                                                                                   |
+| Default        | `[]` (empty = ask or use all connected)                                                              |
+| Schema         | `z.array(z.enum(ADAPT_PLATFORMS)).max(10)`                                                           |
+
+When empty: if `trustLevel` is `show_preview`, agent shows preview and asks which platforms. If `autopilot`, uses all connected platforms.
+
+Example:
+
+```json
+{ "defaultPlatforms": ["linkedin", "x_article"] }
+```
+
+---
+
+### imageStylePreset
+
+Controls the visual style applied to AI-generated images for posts and articles.
+
+| Field            | Value                        |
+| ---------------- | ---------------------------- |
+| Type             | `string` enum                |
+| Values           | `minimal` / `tech` / `bold`  |
+| Default          | `minimal`                    |
+| Change via agent | `PUT /api/agent/image-style` |
+
+Style definitions:
+
+```
+minimal:
+  Look: Clean, generous negative space, single hero object
+  Colors: cream, white, light blue, sage
+  Tone: pastel, muted soft gradients
+
+tech:
+  Look: Dark background, circuit/code motifs, holographic glow
+  Colors: dark navy, electric blue, neon green, purple
+  Tone: cyber aesthetic, neon accents
+
+bold:
+  Look: Aggressive diagonal composition, large scale objects
+  Colors: orange, magenta, electric blue, yellow
+  Tone: vibrant, high saturation, contrasting
+```
+
+The preset is passed as `styleLock` override into the illustration planner prompt. It does not prevent per-image variation — it constrains the palette and composition rules.
+
+---
+
+### contentTone
+
+Default writing tone for posts and articles.
+
+| Field   | Value                              |
+| ------- | ---------------------------------- |
+| Type    | `string` enum                      |
+| Values  | `professional` / `casual` / `bold` |
+| Default | `professional`                     |
+
+Behavior per value:
+
+- `professional`: Formal, structured, industry language
+- `casual`: Conversational, first-person, contractions allowed
+- `bold`: Short sentences, strong claims, opinion-led
+
+Can be overridden per request: `/post topic tone=casual`
+
+---
+
+### publishSchedule
+
+Controls how many posts per day and which time slots to use.
+
+| Field   | Value                |
+| ------- | -------------------- |
+| Type    | object               |
+| Default | `{ postsPerDay: 2 }` |
+
+Sub-fields:
+
+```
+postsPerDay:
+  Type: integer
+  Range: 1-10
+  Default: 2
+
+slots:
+  Type: string[] (HH:MM format, 24h)
+  Max items: 48
+  Default: derived from targetTimezone best practices
+  Example: ["09:00", "17:00"]
+  Validation: /^([01]\d|2[0-3]):[0-5]\d$/
+```
+
+When `slots` is empty, `GET /api/agent/schedule/suggest` returns timezone-appropriate recommendations.
+
+Example:
+
+```json
+{
+  "publishSchedule": {
+    "postsPerDay": 3,
+    "slots": ["08:00", "12:00", "18:00"]
+  }
+}
+```
+
+---
+
+### targetTimezone
+
+IANA timezone identifier for scheduling and slot suggestions.
+
+| Field      | Value                                     |
+| ---------- | ----------------------------------------- |
+| Type       | string (IANA timezone)                    |
+| Default    | `America/New_York`                        |
+| Validation | `Intl.DateTimeFormat` check at write time |
+
+Common values:
+
+```
+America/New_York    — US Eastern
+America/Chicago     — US Central
+America/Los_Angeles — US Pacific
+Europe/London       — UK
+Europe/Berlin       — Central Europe
+Asia/Tokyo          — Japan
+Asia/Singapore      — Southeast Asia
+Australia/Sydney    — Australia East
+```
+
+Invalid IANA strings are rejected with a 400 validation error.
+
+---
+
+### trustLevel
+
+Controls how much the agent acts vs asks before taking action.
+
+| Field   | Value                                    |
+| ------- | ---------------------------------------- |
+| Type    | `string` enum                            |
+| Values  | `ask_all` / `show_preview` / `autopilot` |
+| Default | `show_preview`                           |
+
+Detailed behavior:
+
+```
+ask_all:
+  Agent asks before every decision:
+  - Which platforms?
+  - What tone?
+  - Include image?
+  - When to publish?
+  Best for: users who want full control every time.
+
+show_preview:  [DEFAULT]
+  Agent generates everything, then shows a preview:
+  - Post text per platform
+  - Image link
+  - Knowledge base suggestions ("You have feature X, mention it?")
+  Then asks: publish now or schedule?
+  Best for: most users. Fast but not blind.
+
+autopilot:
+  Agent generates, schedules in next optimal slot, notifies when done.
+  No confirmation required.
+  Best for: users who trust their defaults and want zero friction.
+  Note: requires defaultPlatforms and publishSchedule to be configured.
+```
+
+---
+
+### scanSources
+
+Which sources the trend scanner uses by default when mode is not specified per request.
+
+| Field          | Value                         |
+| -------------- | ----------------------------- |
+| Type           | `string[]`                    |
+| Allowed values | `x`, `google`, `hn`, `reddit` |
+| Default        | `["x", "google"]`             |
+
+Source-to-mode mapping:
+
+```
+scanSources contains:         deriveScanMode() returns:   Cost:
+["x"]                      →  fast                        2 credits
+["x", "google"]            →  deep                        4 credits
+["x", "google", "hn"]      →  ultra                       6 credits
+["x", "google", "hn", "reddit"] → ultra+                  8 credits
+
+Rule: mode is determined by the highest-tier source present.
+reddit > hn > google > x
+```
+
+Examples:
+
+```json
+{ "scanSources": ["x"] }                           // always fast
+{ "scanSources": ["x", "google"] }                 // always deep
+{ "scanSources": ["x", "google", "hn", "reddit"] } // always ultra+
+```
+
+Individual sources:
+
+```
+x:       X (Twitter) — real-time posts and trends via xAI x_search
+google:  Web search — Google results via xAI web_search
+hn:      HackerNews — Algolia API (free, no auth, 10s timeout)
+reddit:  Reddit — via xAI web_search with site:reddit.com (30s timeout)
+```
+
+---
+
+## API
+
+### Read settings
+
+```
+GET /api/agent/settings
+Authorization: Bearer <key>
+```
+
+Returns full `AgentSettings` object with all fields and their current values.
+
+### Write settings (partial update)
+
+```
+PUT /api/agent/settings
+Authorization: Bearer <key>
+Content-Type: application/json
+
+{
+  "trustLevel": "autopilot",
+  "imageStylePreset": "bold"
+}
+```
+
+All fields are optional. Only provided fields are updated. Uses upsert — safe for first-time configuration.
+
+### Web dashboard settings (cookie auth)
+
+```
+GET /api/dashboard/agent-settings
+PUT /api/dashboard/agent-settings
+```
+
+Same schema. Used by the web UI at `/dashboard/settings/agent`. Uses Supabase session cookie, not API key.
+
+---
+
+## Platform Connection Status
+
+Social platforms must be connected separately at `https://www.citedy.com/dashboard/settings?section=account&tab=integrations` before publishing works.
+
+Platform connection flow:
+
+```text
+https://www.citedy.com/dashboard/settings?section=account&tab=integrations
+   │
+   ├── X (Twitter)    → OAuth 1.0a → tokens stored in DB
+   ├── LinkedIn       → OAuth 2.0  → tokens stored in DB
+   ├── Facebook       → OAuth 2.0  → tokens stored in DB
+   ├── Instagram      → Composio   → entity_id stored
+   ├── YouTube        → Composio   → entity_id stored
+   ├── Reddit         → Composio   → entity_id stored
+   └── Threads        → Composio   → entity_id stored
+```
+
+YouTube OAuth also available at: `GET /api/auth/youtube` → `GET /api/auth/youtube/callback`
+Instagram OAuth: `GET /api/auth/instagram`
+
+The `/api/agent/status` endpoint shows which platforms are connected and which are not.
+
+---
+
+## Default Values Summary
+
+| Setting                     | Default                      |
+| --------------------------- | ---------------------------- |
+| defaultPlatforms            | `[]` (empty)                 |
+| imageStylePreset            | `minimal`                    |
+| contentTone                 | `professional`               |
+| publishSchedule.postsPerDay | `2`                          |
+| publishSchedule.slots       | `undefined` (auto-suggested) |
+| targetTimezone              | `America/New_York`           |
+| trustLevel                  | `show_preview`               |
+| scanSources                 | `["x", "google"]`            |
